@@ -1,0 +1,27 @@
+{
+  "log_level": 1,
+  "audio_upload": {
+    "allowed_extensions": [".wav", ".m4a", ".mp3"],
+    "max_audio_length": 300,
+    "max_file_size": 3
+  },
+  "whisper": {
+    "device": "cuda",
+    "cpu_threads": 4,
+    "compute_type": "float32",
+    "model": "large-v3",
+    "language": "en",
+    "beam_size": 5,
+    "best_of": 5,
+    "vad_filter": true,
+    "vad_parameters": {
+      "threshold":  0.5,
+      "min_speech_duration_ms": 250,
+      "max_speech_duration_s": 3600,
+      "min_silence_duration_ms": 2000,
+      "window_size_samples": 1024,
+      "speech_pad_ms": 400
+    }
+
+  }
+}

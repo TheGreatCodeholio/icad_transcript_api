@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  transcription:
+    image: thegreatcodeholio/icad_transcribe_api:latest
+    environment:
+      SECRET_KEY: ${SECRET_KEY}
+      TRANSFORMERS_CACHE: ${TRANSFORMERS_CACHE}
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [ gpu ]
+    ports:
+      - "9912:9912"
+    volumes:
+      - ${WORKING_PATH}/log:/app/log
+      - ${WORKING_PATH}/etc:/app/etc
+      - ${WORKING_PATH}/models:/app/models
