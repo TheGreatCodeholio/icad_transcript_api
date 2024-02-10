@@ -1,6 +1,8 @@
 import json
 import logging
+import os
 import time
+from datetime import datetime, timedelta
 
 module_logger = logging.getLogger('icad_transcribe.config')
 
@@ -33,6 +35,25 @@ default_config = {
 }
 
 
+def is_model_outdated(directory, days=7):
+    """Check if the model files in the directory are older than 'days' days."""
+    now = datetime.now()
+    threshold = now - timedelta(days=days)
+
+    if not os.path.exists(directory):
+        # Directory does not exist, so model is considered outdated
+        return True
+
+    for filename in os.listdir(directory):
+        file_path = os.path.join(directory, filename)
+        file_mod_time = datetime.fromtimestamp(os.path.getmtime(file_path))
+        if file_mod_time < threshold:
+            # At least one file is older than the threshold, so model is outdated
+            return True
+
+    # All files are within the 'days' threshold
+    return False
+
 def get_max_content_length(config_data, default_size_mb=3):
     try:
         # Attempt to retrieve and convert the max file size to an integer
@@ -57,7 +78,7 @@ def load_config_file(file_path):
             config_data = json.load(f)
     except FileNotFoundError:
         module_logger.warning(f'Configuration file {file_path} not found. Creating default.')
-        save_config_file(file_path, config_data)  # Assuming this function is defined elsewhere
+        save_config_file(file_path, default_config)  # Assuming this function is defined elsewhere
     except json.JSONDecodeError:
         module_logger.error(f'Configuration file {file_path} is not in valid JSON format.')
         return None

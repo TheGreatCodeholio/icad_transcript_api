@@ -41,37 +41,32 @@ def extract_town(text):
     return cleaned_towns
 
 
-def get_potentional_addresses(transcript):
-    matches = []
+def get_potential_addresses(transcript):
+    transcript = transcript.replace(",", "").replace("  ", " ")
     address_regex = re.compile(build_address_regex())
-    data = address_regex.findall(transcript)
+    addresses = address_regex.findall(transcript)
 
-    town = extract_town(transcript)
-    if town and data:
-        data[0] = (*data[0], town[0])
-
-    if data:
-        matches.append(data[0])
+    towns = extract_town(transcript)
+    # Assuming extract_town returns a list of towns or an empty list if no towns are found
 
     valid_suffixes = {'Street', 'St', 'Road', 'Rd', 'Avenue', 'Ave', 'Boulevard', 'Blvd', 'Lane', 'Ln', 'Drive', 'Dr',
                       'Terrace', 'Place', 'Court', 'Parkway', 'Circle', 'Trail', 'Way', 'Turnpike', 'Heights', 'Loop',
                       'Path', 'Trace', 'Crossing', 'Cove', 'Bend', 'Landing', 'Pass', 'Ridge'}
 
     cleaned_addresses = []
-    for match in matches:
-        if len(match) == 26:
-            town = match[-1].strip()
-        else:
-            town = False
-        address = match[0].strip().replace("-", "")
+    for address in addresses:
+        address_text = address[0].strip().replace("-", "")
+        if len(address_text) > 5 and (address_text.split()[-1] in valid_suffixes or address_text.split()[-1].isdigit()):
+            full_address = address_text
+            if towns:  # If a town is extracted, append it to the address
+                full_address += f" in {towns[0]}"  # Assuming we take the first town if there are multiple
+            cleaned_addresses.append(full_address)
 
-        # Validate and clean the address
-        if len(address) > 5 and (address.split()[-1] in valid_suffixes or address.split()[-1].isdigit()):
-            if town:
-                cleaned_addresses.append(f"{address} in {town}")
-            else:
-                cleaned_addresses.append(f"{address}")
+    # If no addresses were found but a town was, add the town to the results
+    if not cleaned_addresses and towns:
+        cleaned_addresses.append(towns[0])
 
+    # Remove duplicates by converting the list to a set, then back to a list
     unique_addresses = list(set(cleaned_addresses))
 
     return unique_addresses

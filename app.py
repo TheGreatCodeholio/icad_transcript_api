@@ -5,11 +5,11 @@ import traceback
 from os.path import splitext
 
 from flask import Flask, request, render_template, jsonify
-from faster_whisper import WhisperModel
+from faster_whisper import WhisperModel, download_model
 from pydub import AudioSegment
 
-from lib.address_handler import get_potentional_addresses
-from lib.config_handler import load_config_file, get_max_content_length
+from lib.address_handler import get_potential_addresses
+from lib.config_handler import load_config_file, get_max_content_length, is_model_outdated
 from lib.logging_handler import CustomLogger
 
 app_name = "icad_transcribe"
@@ -45,14 +45,24 @@ app = Flask(__name__, template_folder='templates', static_folder='static')
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
 app.config['MAX_CONTENT_LENGTH'] = get_max_content_length(config_data)
 
+model_cache_dir = os.path.join(os.getenv("TRANSFORMERS_CACHE", "/app/models"),
+                               config_data.get("whisper", {}).get("model", "small"))
+
+if is_model_outdated(model_cache_dir):
+    logger.warning(f"Model is outdated or not found. Downloading model {config_data.get('whisper', {}).get('model', 'small')}...")
+    model_dir = download_model(config_data.get("whisper", {}).get("model", "small"), output_dir=model_cache_dir)
+else:
+    logger.info(f"Using cached model. {config_data.get('whisper', {}).get('model', 'small')}")
+    model_dir = model_cache_dir
+
 try:
-    if config_data.get("whisper", {}).get("device", None) in ["cpu", "nvidia"]:
-        model = WhisperModel(config_data.get("whisper", {}).get("model", "small"),
+    if config_data.get("whisper", {}).get("device", None) in ["cpu", "cuda"]:
+        model = WhisperModel(model_dir,
                              device=config_data.get("whisper", {}).get("device", "cpu"),
                              cpu_threads=config_data.get("whisper", {}).get("cpu_threads", 4),
                              compute_type=config_data.get("whisper", {}).get("compute_type", "float32"))
     else:
-        logger.error(f'Whisper device needs to be either CPU or Nvidia.')
+        logger.error(f'Whisper device needs to be either CPU or Cuda.')
         time.sleep(5)
         exit(1)
 
@@ -77,7 +87,7 @@ def transcribe():
             logger.error(result.get("message"))
             return jsonify(result), 400
 
-        allowed_extensions = config_data.get("upload", {}).get("allowed_extensions", [])
+        allowed_extensions = config_data.get("audio_upload", {}).get("allowed_extensions", [])
         ext = splitext(file.filename)[1]
         if ext not in allowed_extensions:
             result = {"status": "error", "message": "File must be an MP3, WAV or M4A"}
@@ -88,7 +98,7 @@ def transcribe():
 
         audio = AudioSegment.from_file(io.BytesIO(file_data))
 
-        if audio.duration_seconds > 300:
+        if audio.duration_seconds > config_data.get("audio_upload", {}).get("max_audio_length", 300):
             result = {"status": "error", "message": "File duration must be under 5 minutes"}
             logger.error(result.get("message"))
             return jsonify(result), 400
@@ -106,7 +116,16 @@ def transcribe():
                                                   "window_size_samples": 1024,
                                                   "speech_pad_ms": 400
                                               }))
-            transcribe_text = " ".join(segment.text for segment in segments)
+            segment_texts = []
+            segments_data = []
+            segment_count = 0
+            for segment in segments:
+                segment_count += 1
+                segment_texts.append(segment.text.strip())
+                segments_data.append({"segment_id": segment_count, "text": segment.text.strip(), "start": segment.start,
+                                      "end": segment.end})
+
+            transcribe_text = " ".join(segment_texts)
 
         except Exception as e:
             result = {"status": "error", "message": f"Exception: {e}"}
@@ -117,10 +136,11 @@ def transcribe():
             transcribe_text = []
             addresses = []
         else:
-            addresses = get_potentional_addresses(transcribe_text)
+            addresses = get_potential_addresses(transcribe_text)
 
         result = {"status": "ok", "message": "Transcribe Success!", "transcription": transcribe_text,
-                  "addresses": addresses, "segments": segments, "process_time_seconds": round((time.time() - start), 2)}
+                  "addresses": addresses, "segments": segments_data,
+                  "process_time_seconds": round((time.time() - start), 2)}
         logger.info(result.get("message"))
         return jsonify(result), 200
     else:
