@@ -3,6 +3,7 @@ WORKDIR /app
 COPY app.py /app
 COPY lib /app/lib
 COPY templates /app/templates
+COPY static /app/static
 
 COPY requirements.txt /app
 RUN apt-get update &&  \
