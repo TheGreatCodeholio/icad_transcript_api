@@ -13,6 +13,8 @@
     "language": "en",
     "beam_size": 5,
     "best_of": 5,
+    "initial_prompt": null,
+    "word_timestamps": false,
     "vad_filter": true,
     "vad_parameters": {
       "threshold":  0.5,

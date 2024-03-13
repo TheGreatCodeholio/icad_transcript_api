@@ -107,6 +107,8 @@ def transcribe():
                                               beam_size=config_data.get("whisper", {}).get("beam_size", 5),
                                               best_of=config_data.get("whisper", {}).get("best_of", 5),
                                               language=config_data.get("whisper", {}).get("language", "en"),
+                                              initial_prompt=config_data.get("whisper", {}).get("initial_prompt", None),
+                                              word_timestamps=config_data.get("whisper", {}).get("word_timestamps", False),
                                               vad_filter=config_data.get("whisper", {}).get("vad_filter", False),
                                               vad_parameters=config_data.get("whisper", {}).get("vad_parameters", {
                                                   "threshold": 0.5,
