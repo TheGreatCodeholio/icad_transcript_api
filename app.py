@@ -1,16 +1,17 @@
 import io
+import json
 import os
 import time
 import traceback
-from os.path import splitext
 
 from flask import Flask, request, render_template, jsonify
 from faster_whisper import WhisperModel, download_model
-from pydub import AudioSegment
 
 from lib.address_handler import get_potential_addresses
 from lib.config_handler import load_config_file, get_max_content_length, is_model_outdated
+from lib.helpers import load_json_data, update_config, validate_file
 from lib.logging_handler import CustomLogger
+from lib.unit_handler import associate_segments_with_src
 
 app_name = "icad_transcribe"
 __version__ = "2.0"
@@ -25,8 +26,12 @@ config_path = os.path.join(root_path, 'etc')
 logging_instance = CustomLogger(1, f'{app_name}',
                                 os.path.join(log_path, log_file_name))
 
+last_transcript_data = {}
+
+
 try:
     config_data = load_config_file(os.path.join(config_path, config_file_name))
+    whisper_config_data = config_data.get("whisper", {})
     logging_instance.set_log_level(config_data["log_level"])
     logger = logging_instance.logger
     logger.info("Loaded Config File")
@@ -49,7 +54,8 @@ model_cache_dir = os.path.join(os.getenv("TRANSFORMERS_CACHE", "/app/models"),
                                config_data.get("whisper", {}).get("model", "small"))
 
 if is_model_outdated(model_cache_dir):
-    logger.warning(f"Model is outdated or not found. Downloading model {config_data.get('whisper', {}).get('model', 'small')}...")
+    logger.warning(
+        f"Model is outdated or not found. Downloading model {config_data.get('whisper', {}).get('model', 'small')}...")
     model_dir = download_model(config_data.get("whisper", {}).get("model", "small"), output_dir=model_cache_dir)
 else:
     logger.info(f"Using cached model. {config_data.get('whisper', {}).get('model', 'small')}")
@@ -81,36 +87,65 @@ def request_entity_too_large(error):
 def transcribe():
     if request.method == "POST":
         start = time.time()
-        file = request.files.get('file')
-        if not file:
+        audio_file = request.files.get('audioFile')
+        json_file = request.files.get('jsonFile')
+        user_whisper_config_data = request.form.get('whisper_config_data')
+
+        if not audio_file or not json_file:
             result = {"status": "error", "message": "No file uploaded"}
-            logger.error(result.get("message"))
             return jsonify(result), 400
 
-        allowed_extensions = config_data.get("audio_upload", {}).get("allowed_extensions", [])
-        ext = splitext(file.filename)[1]
-        if ext not in allowed_extensions:
-            result = {"status": "error", "message": "File must be an MP3, WAV or M4A"}
-            logger.error(result.get("message"))
-            return jsonify(result), 400
+        # Load and validate JSON file data
+        call_data, error = load_json_data(json_file)
+        if error:
+            return jsonify({"status": "error", "message": error}), 400
 
-        file_data = file.read()
+        # Update config data with user input
+        if user_whisper_config_data:
+            try:
+                user_whisper_config_data = json.loads(user_whisper_config_data)
+                user_whisper_config_data = update_config(whisper_config_data, user_whisper_config_data)
+            except json.JSONDecodeError:
+                return jsonify({"status": "error", "message": "Invalid JSON data"}), 400
+        else:
+            user_whisper_config_data = whisper_config_data
 
-        audio = AudioSegment.from_file(io.BytesIO(file_data))
 
-        if audio.duration_seconds > config_data.get("audio_upload", {}).get("max_audio_length", 300):
-            result = {"status": "error", "message": "File duration must be under 5 minutes"}
-            logger.error(result.get("message"))
-            return jsonify(result), 400
+        transmission_sources = call_data.get('srcList', [{
+                "pos": 0,
+                "src": 0,
+                "tag": "Speaker"
+        }])
+
+        short_name = call_data.get("short_name", "")
+        talkgroup_decimal = call_data.get("talkgroup_decimal", 0)
+
+        # Validate audio file
+        is_valid, validation_response = validate_file(audio_file, config_data["audio_upload"]["allowed_extensions"],
+                                                      config_data.get("audio_upload", {}).get("max_audio_length", 300))
+        if not is_valid:
+            return jsonify({"status": "error", "message": validation_response}), 400
+        if isinstance(validation_response, str):
+            return jsonify({"status": "error", "message": validation_response}), 400
+        audio = validation_response  # This is the AudioSegment object
+
         try:
-            segments, info = model.transcribe(io.BytesIO(file_data),
-                                              beam_size=config_data.get("whisper", {}).get("beam_size", 5),
-                                              best_of=config_data.get("whisper", {}).get("best_of", 5),
-                                              language=config_data.get("whisper", {}).get("language", "en"),
-                                              initial_prompt=config_data.get("whisper", {}).get("initial_prompt", None),
-                                              word_timestamps=config_data.get("whisper", {}).get("word_timestamps", False),
-                                              vad_filter=config_data.get("whisper", {}).get("vad_filter", False),
-                                              vad_parameters=config_data.get("whisper", {}).get("vad_parameters", {
+
+            if user_whisper_config_data.get("use_last_as_initial_prompt", False):
+                initial_prompt = last_transcript_data.get(short_name, {}).get(str(talkgroup_decimal), {}).get(
+                    "transcript", None)
+            else:
+                initial_prompt = user_whisper_config_data.get("initial_prompt", None)
+
+            segments, info = model.transcribe(io.BytesIO(audio),
+                                              beam_size=user_whisper_config_data.get("beam_size", 5),
+                                              best_of=user_whisper_config_data.get("best_of", 5),
+                                              language=user_whisper_config_data.get("language", "en"),
+                                              initial_prompt=initial_prompt,
+                                              word_timestamps=user_whisper_config_data.get("word_timestamps", False),
+
+                                              vad_filter=user_whisper_config_data.get("vad_filter", False),
+                                              vad_parameters=user_whisper_config_data.get("vad_parameters", {
                                                   "threshold": 0.5,
                                                   "min_speech_duration_ms": 250,
                                                   "max_speech_duration_s": 3600,
@@ -124,10 +159,21 @@ def transcribe():
             for segment in segments:
                 segment_count += 1
                 segment_texts.append(segment.text.strip())
-                segments_data.append({"segment_id": segment_count, "text": segment.text.strip(), "start": segment.start,
+                text = []
+                word_id = 0
+                if user_whisper_config_data.get("word_timestamps", False):
+                    for word in segment.words:
+                        word_id += 1
+                        text.append({'word_id': word_id, 'word': word.word, 'start': word.start, 'end': word.end})
+                else:
+                    text = segment.text
+
+                segments_data.append({"segment_id": segment_count, "text": text, "start": segment.start,
                                       "end": segment.end})
 
             transcribe_text = " ".join(segment_texts)
+
+            segments_data = associate_segments_with_src(segments_data, transmission_sources)
 
         except Exception as e:
             result = {"status": "error", "message": f"Exception: {e}"}
@@ -140,7 +186,10 @@ def transcribe():
         else:
             addresses = get_potential_addresses(transcribe_text)
 
-        result = {"status": "ok", "message": "Transcribe Success!", "transcription": transcribe_text,
+        last_transcript = {str(talkgroup_decimal): {"transcript": transcribe_text}}
+        last_transcript_data[short_name] = last_transcript
+
+        result = {"status": "ok", "message": "Transcribe Success!", "transcript": transcribe_text,
                   "addresses": addresses, "segments": segments_data,
                   "process_time_seconds": round((time.time() - start), 2)}
         logger.info(result.get("message"))

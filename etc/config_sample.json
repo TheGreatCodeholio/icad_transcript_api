@@ -8,12 +8,13 @@
   "whisper": {
     "device": "cuda",
     "cpu_threads": 4,
-    "compute_type": "float32",
+    "compute_type": "float16",
     "model": "large-v3",
     "language": "en",
     "beam_size": 5,
     "best_of": 5,
     "initial_prompt": null,
+    "use_last_as_initial_prompt": false,
     "word_timestamps": false,
     "vad_filter": true,
     "vad_parameters": {

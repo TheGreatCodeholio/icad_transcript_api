@@ -16,7 +16,7 @@ default_config = {
     "whisper": {
         "device": "cuda",
         "cpu_threads": 4,
-        "compute_type": "float32",
+        "compute_type": "float16",
         "model": "large-v3",
         "language": "en",
         "beam_size": 5,
