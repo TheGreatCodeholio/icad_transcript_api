@@ -1,5 +1,4 @@
 
-
 def associate_segments_with_src(segments, src_list):
     if len(src_list) == 0:
         src_list = [{
@@ -21,7 +20,7 @@ def associate_segments_with_src(segments, src_list):
                 if src.get('tag') != '':
                     src_for_segment = src.get("tag")
                 else:
-                    src_for_segment = src['src']
+                    src_for_segment = src['src'] if src['src'] != -1 else 0
             else:
                 break
 

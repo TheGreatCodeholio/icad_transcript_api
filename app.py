@@ -18,6 +18,8 @@ __version__ = "2.0"
 
 root_path = os.getcwd()
 config_file_name = "config.json"
+hallucination_file_name = "hallucinations.json"
+
 log_file_name = f"{app_name}.log"
 
 log_path = os.path.join(root_path, 'log')
@@ -27,7 +29,6 @@ logging_instance = CustomLogger(1, f'{app_name}',
                                 os.path.join(log_path, log_file_name))
 
 last_transcript_data = {}
-
 
 try:
     config_data = load_config_file(os.path.join(config_path, config_file_name))
@@ -50,7 +51,7 @@ app = Flask(__name__, template_folder='templates', static_folder='static')
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
 app.config['MAX_CONTENT_LENGTH'] = get_max_content_length(config_data)
 
-model_cache_dir = os.path.join(os.getenv("TRANSFORMERS_CACHE", "/app/models"),
+model_cache_dir = os.path.join(os.getenv("TRANSFORMERS_CACHE", os.path.join(root_path, 'models')),
                                config_data.get("whisper", {}).get("model", "small"))
 
 if is_model_outdated(model_cache_dir):
@@ -93,11 +94,13 @@ def transcribe():
 
         if not audio_file or not json_file:
             result = {"status": "error", "message": "No file uploaded"}
+            logger.error("No file uploaded.")
             return jsonify(result), 400
 
         # Load and validate JSON file data
         call_data, error = load_json_data(json_file)
         if error:
+            logger.error(error)
             return jsonify({"status": "error", "message": error}), 400
 
         # Update config data with user input
@@ -106,15 +109,15 @@ def transcribe():
                 user_whisper_config_data = json.loads(user_whisper_config_data)
                 user_whisper_config_data = update_config(whisper_config_data, user_whisper_config_data)
             except json.JSONDecodeError:
+                logger.exception("Error parsing User Whisper Config Data")
                 return jsonify({"status": "error", "message": "Invalid JSON data"}), 400
         else:
             user_whisper_config_data = whisper_config_data
 
-
         transmission_sources = call_data.get('srcList', [{
-                "pos": 0,
-                "src": 0,
-                "tag": "Speaker"
+            "pos": 0,
+            "src": 0,
+            "tag": "Speaker"
         }])
 
         short_name = call_data.get("short_name", "")
@@ -124,10 +127,10 @@ def transcribe():
         is_valid, validation_response = validate_file(audio_file, config_data["audio_upload"]["allowed_extensions"],
                                                       config_data.get("audio_upload", {}).get("max_audio_length", 300))
         if not is_valid:
+            logger.error(validation_response)
             return jsonify({"status": "error", "message": validation_response}), 400
-        if isinstance(validation_response, str):
-            return jsonify({"status": "error", "message": validation_response}), 400
-        audio = validation_response  # This is the AudioSegment object
+
+        audio_file.seek(0)  # Reset the pointer to allow re-reading
 
         try:
 
@@ -137,13 +140,12 @@ def transcribe():
             else:
                 initial_prompt = user_whisper_config_data.get("initial_prompt", None)
 
-            segments, info = model.transcribe(io.BytesIO(audio),
+            segments, info = model.transcribe(io.BytesIO(audio_file.read()),
                                               beam_size=user_whisper_config_data.get("beam_size", 5),
                                               best_of=user_whisper_config_data.get("best_of", 5),
                                               language=user_whisper_config_data.get("language", "en"),
                                               initial_prompt=initial_prompt,
                                               word_timestamps=user_whisper_config_data.get("word_timestamps", False),
-
                                               vad_filter=user_whisper_config_data.get("vad_filter", False),
                                               vad_parameters=user_whisper_config_data.get("vad_parameters", {
                                                   "threshold": 0.5,
@@ -153,6 +155,7 @@ def transcribe():
                                                   "window_size_samples": 1024,
                                                   "speech_pad_ms": 400
                                               }))
+
             segment_texts = []
             segments_data = []
             segment_count = 0
@@ -166,16 +169,19 @@ def transcribe():
                         word_id += 1
                         text.append({'word_id': word_id, 'word': word.word, 'start': word.start, 'end': word.end})
                 else:
-                    text = segment.text
+                    text = []
 
-                segments_data.append({"segment_id": segment_count, "text": text, "start": segment.start,
-                                      "end": segment.end})
+                segments_data.append(
+                    {"segment_id": segment_count, "text": segment.text.strip(), "words": text, "unit_tag": "",
+                     "start": segment.start,
+                     "end": segment.end})
 
             transcribe_text = " ".join(segment_texts)
 
             segments_data = associate_segments_with_src(segments_data, transmission_sources)
 
         except Exception as e:
+            traceback.print_exc()
             result = {"status": "error", "message": f"Exception: {e}"}
             logger.error(result.get("message"))
             return jsonify(result), 400

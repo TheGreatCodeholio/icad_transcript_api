@@ -4,6 +4,8 @@ from os.path import splitext
 
 from pydub import AudioSegment
 
+hallucinations = [""]
+
 
 def load_json_data(file):
     try:
@@ -30,9 +32,8 @@ def validate_file(audio_file, allowed_extensions, max_audio_length):
         return False, "File must be an MP3, WAV or M4A"
 
     audio = AudioSegment.from_file(io.BytesIO(audio_file.read()))
-    audio_file.seek(0)  # Reset the pointer to allow re-reading
 
     if audio.duration_seconds > max_audio_length:
         return False, "File duration must be under 5 minutes"
 
-    return True, audio_file
+    return True, "Valid audio file"
