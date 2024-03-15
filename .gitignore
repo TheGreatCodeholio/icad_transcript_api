@@ -5,7 +5,7 @@ __pycache__/
 *_test.py
 # C extensions
 *.so
-
+test_audio/
 # Distribution / packaging
 .Python
 build/
