@@ -1,6 +1,6 @@
+from json import JSONDecodeError
+
 import requests
-import os
-import glob
 
 # Define the URL
 url = "http://localhost:9912/transcribe"
@@ -24,8 +24,12 @@ directory = '/home/ian/Documents/transcribe_test'
 #
 #     print(response_data)
 
-with open('wyalusing_20240123_173313.mp3', 'rb') as f:
-    files = {'file': f}
+with open('audio_2024-03-31_16-39-16.mp3', 'rb') as af, open('test_audio/athens_water_rescue.json', 'rb') as jf:
+    files = {'audioFile': af, 'jsonFile': jf}
     response = requests.post(url, files=files)
-    response_data = response.json()
+    try:
+        response_data = response.json()
+    except JSONDecodeError:
+        response_data = response.text
     print(response_data)
+

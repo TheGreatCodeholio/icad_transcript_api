@@ -11,7 +11,10 @@ default_config = {
     "audio_upload": {
         "allowed_extensions": [".wav", ".m4a", ".mp3"],
         "max_audio_length": 300,
-        "max_file_size": 3
+        "max_file_size": 3,
+        "cut_tones": 0,
+        "cut_pre_tone": 0.5,
+        "cut_post_tones": 0.5
     },
     "whisper": {
         "device": "cuda",
@@ -53,6 +56,7 @@ def is_model_outdated(directory, days=7):
 
     # All files are within the 'days' threshold
     return False
+
 
 def get_max_content_length(config_data, default_size_mb=3):
     try:

@@ -4,13 +4,16 @@ import os
 import time
 import traceback
 
+import pydub
 from flask import Flask, request, render_template, jsonify
 from faster_whisper import WhisperModel, download_model
+from pydub import AudioSegment
 
 from lib.address_handler import get_potential_addresses
 from lib.config_handler import load_config_file, get_max_content_length, is_model_outdated
 from lib.helpers import load_json_data, update_config, validate_file
 from lib.logging_handler import CustomLogger
+from lib.tone_removal_handler import cut_tones_from_audio, detect_tones_in_audio
 from lib.unit_handler import associate_segments_with_src
 
 app_name = "icad_transcribe"
@@ -130,7 +133,18 @@ def transcribe():
             logger.error(validation_response)
             return jsonify({"status": "error", "message": validation_response}), 400
 
-        audio_file.seek(0)  # Reset the pointer to allow re-reading
+        audio_file.seek(0)  # Rewind the buffer to the beginning
+
+        audio_segment = pydub.AudioSegment.from_file(io.BytesIO(audio_file.read()))
+
+        if config_data.get("audio_upload", {}).get("cut_tones") == 1:
+            detected_tones = detect_tones_in_audio(audio_segment)
+            audio_segment = cut_tones_from_audio(detected_tones, audio_segment, pre_cut_length=config_data.get("audio_upload", {}).get("cut_pre_tone", 0.5), post_cut_length=config_data.get("audio_upload", {}).get("cut_post_tone", 0.5))
+
+        # Convert the PyDub AudioSegment to bytes
+        audio_buffer = io.BytesIO()
+        audio_segment.export(audio_buffer, format="wav")
+        audio_buffer.seek(0)  # Rewind the buffer to the beginning
 
         try:
 
@@ -140,7 +154,7 @@ def transcribe():
             else:
                 initial_prompt = user_whisper_config_data.get("initial_prompt", None)
 
-            segments, info = model.transcribe(io.BytesIO(audio_file.read()),
+            segments, info = model.transcribe(audio_buffer,
                                               beam_size=user_whisper_config_data.get("beam_size", 5),
                                               best_of=user_whisper_config_data.get("best_of", 5),
                                               language=user_whisper_config_data.get("language", "en"),

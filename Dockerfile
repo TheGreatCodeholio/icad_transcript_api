@@ -6,18 +6,21 @@ COPY templates /app/templates
 COPY static /app/static
 
 COPY requirements.txt /app
-RUN apt-get update &&  \
+RUN apt update &&  \
     DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-    python3.11 \
     python3-pip \
     python3-setuptools \
     python3-dev \
     build-essential \
     && \
-    apt-get clean && \
+    apt clean && \
     rm -rf /var/lib/apt/lists/*
+
+# Upgrade pip
+RUN pip3 install --upgrade pip
+
 # Install any needed packages specified in requirements.txt
-RUN pip install --trusted-host pypi.python.org -r requirements.txt
+RUN pip3 install -r requirements.txt
 
 # Install FFmpeg
 RUN apt update && \

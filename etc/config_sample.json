@@ -3,7 +3,10 @@
   "audio_upload": {
     "allowed_extensions": [".wav", ".m4a", ".mp3"],
     "max_audio_length": 300,
-    "max_file_size": 3
+    "max_file_size": 3,
+    "cut_tones": 0,
+    "cut_pre_tone": 0.5,
+    "cut_post_tones": 0.5
   },
   "whisper": {
     "device": "cuda",
