@@ -83,6 +83,7 @@ def load_config_file(file_path):
     except FileNotFoundError:
         module_logger.warning(f'Configuration file {file_path} not found. Creating default.')
         save_config_file(file_path, default_config)  # Assuming this function is defined elsewhere
+        return None
     except json.JSONDecodeError:
         module_logger.error(f'Configuration file {file_path} is not in valid JSON format.')
         return None
