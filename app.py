@@ -7,11 +7,10 @@ import traceback
 import pydub
 from flask import Flask, request, render_template, jsonify
 from faster_whisper import WhisperModel, download_model
-from pydub import AudioSegment
 
 from lib.address_handler import get_potential_addresses
 from lib.config_handler import load_config_file, get_max_content_length, is_model_outdated
-from lib.helpers import load_json_data, update_config, validate_file
+from lib.helpers import load_json, update_config, validate_audio_file
 from lib.logging_handler import CustomLogger
 from lib.tone_removal_handler import cut_tones_from_audio, detect_tones_in_audio
 from lib.unit_handler import associate_segments_with_src
@@ -84,7 +83,7 @@ except Exception as e:
 
 @app.errorhandler(413)
 def request_entity_too_large(error):
-    return jsonify({"status": "error", "message": "Request body too large"}), 413
+    return jsonify({"success": False, "message": "Request body too large"}), 413
 
 
 @app.route('/transcribe', methods=["POST"])
@@ -96,15 +95,15 @@ def transcribe():
         user_whisper_config_data = request.form.get('whisper_config_data')
 
         if not audio_file or not json_file:
-            result = {"status": "error", "message": "No file uploaded"}
+            result = {"success": False, "message": "No file uploaded"}
             logger.error("No file uploaded.")
             return jsonify(result), 400
 
         # Load and validate JSON file data
-        call_data, error = load_json_data(json_file)
+        call_data, error = load_json(json_file)
         if error:
             logger.error(error)
-            return jsonify({"status": "error", "message": error}), 400
+            return jsonify({"success": False, "message": error}), 400
 
         # Update config data with user input
         if user_whisper_config_data:
@@ -113,7 +112,7 @@ def transcribe():
                 user_whisper_config_data = update_config(whisper_config_data, user_whisper_config_data)
             except json.JSONDecodeError:
                 logger.exception("Error parsing User Whisper Config Data")
-                return jsonify({"status": "error", "message": "Invalid JSON data"}), 400
+                return jsonify({"success": False, "message": "Invalid JSON data"}), 400
         else:
             user_whisper_config_data = whisper_config_data
 
@@ -127,17 +126,17 @@ def transcribe():
         talkgroup_decimal = call_data.get("talkgroup_decimal", 0)
 
         # Validate audio file
-        is_valid, validation_response = validate_file(audio_file, config_data["audio_upload"]["allowed_extensions"],
+        is_valid, validation_response = validate_audio_file(audio_file, config_data.get("audio_upload", {}).get("allowed_extensions", ["audio/x-wav", "audio/x-m4a", "audio/mpeg"]),
                                                       config_data.get("audio_upload", {}).get("max_audio_length", 300))
         if not is_valid:
             logger.error(validation_response)
-            return jsonify({"status": "error", "message": validation_response}), 400
+            return jsonify({"success": False, "message": validation_response}), 400
 
         audio_file.seek(0)  # Rewind the buffer to the beginning
 
         audio_segment = pydub.AudioSegment.from_file(io.BytesIO(audio_file.read()))
 
-        if config_data.get("audio_upload", {}).get("cut_tones") == 1:
+        if config_data.get("audio_upload", {}).get("cut_tones", 0) == 1:
             detected_tones = detect_tones_in_audio(audio_segment)
             audio_segment = cut_tones_from_audio(detected_tones, audio_segment, pre_cut_length=config_data.get("audio_upload", {}).get("cut_pre_tone", 0.5), post_cut_length=config_data.get("audio_upload", {}).get("cut_post_tone", 0.5))
 
@@ -196,7 +195,7 @@ def transcribe():
 
         except Exception as e:
             traceback.print_exc()
-            result = {"status": "error", "message": f"Exception: {e}"}
+            result = {"success": False, "message": f"Exception: {e}"}
             logger.error(result.get("message"))
             return jsonify(result), 400
 
@@ -209,13 +208,13 @@ def transcribe():
         last_transcript = {str(talkgroup_decimal): {"transcript": transcribe_text}}
         last_transcript_data[short_name] = last_transcript
 
-        result = {"status": "ok", "message": "Transcribe Success!", "transcript": transcribe_text,
+        result = {"success": True, "message": "Transcribe Success!", "transcript": transcribe_text,
                   "addresses": addresses, "segments": segments_data,
                   "process_time_seconds": round((time.time() - start), 2)}
         logger.info(result.get("message"))
         return jsonify(result), 200
     else:
-        result = {"status": "error", "message": "Method not allowed GET"}
+        result = {"success": False, "message": "Method not allowed GET"}
         logger.error(result.get("message"))
         return jsonify(result), 405
 

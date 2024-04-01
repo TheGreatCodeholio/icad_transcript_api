@@ -9,7 +9,7 @@ module_logger = logging.getLogger('icad_transcribe.config')
 default_config = {
     "log_level": 1,
     "audio_upload": {
-        "allowed_extensions": [".wav", ".m4a", ".mp3"],
+        "allowed_extensions": ["audio/x-wav", "audio/x-m4a", "audio/mpeg"],
         "max_audio_length": 300,
         "max_file_size": 3,
         "cut_tones": 0,
@@ -33,7 +33,6 @@ default_config = {
             "window_size_samples": 1024,
             "speech_pad_ms": 400
         }
-
     }
 }
 
