@@ -93,17 +93,19 @@ def transcribe():
         audio_file = request.files.get('audioFile')
         json_file = request.files.get('jsonFile')
         user_whisper_config_data = request.form.get('whisper_config_data')
+        call_data = None
 
-        if not audio_file or not json_file:
-            result = {"success": False, "message": "No file uploaded"}
+        if not audio_file:
+            result = {"success": False, "message": "No audio file uploaded"}
             logger.error("No file uploaded.")
             return jsonify(result), 400
 
         # Load and validate JSON file data
-        call_data, error = load_json(json_file)
-        if error:
-            logger.error(error)
-            return jsonify({"success": False, "message": error}), 400
+        if json_file:
+            call_data, error = load_json(json_file)
+            if error:
+                logger.error(error)
+                return jsonify({"success": False, "message": error}), 400
 
         # Update config data with user input
         if user_whisper_config_data:
@@ -122,7 +124,7 @@ def transcribe():
             "tag": "Speaker"
         }])
 
-        short_name = call_data.get("short_name", "")
+        short_name = call_data.get("short_name", "Unknown")
         talkgroup_decimal = call_data.get("talkgroup_decimal", 0)
 
         # Validate audio file
@@ -147,7 +149,7 @@ def transcribe():
 
         try:
 
-            if user_whisper_config_data.get("use_last_as_initial_prompt", False):
+            if user_whisper_config_data.get("use_last_as_initial_prompt", False) and call_data:
                 initial_prompt = last_transcript_data.get(short_name, {}).get(str(talkgroup_decimal), {}).get(
                     "transcript", None)
             else:
@@ -191,7 +193,8 @@ def transcribe():
 
             transcribe_text = " ".join(segment_texts)
 
-            segments_data = associate_segments_with_src(segments_data, transmission_sources)
+            if call_data:
+                segments_data = associate_segments_with_src(segments_data, transmission_sources)
 
         except Exception as e:
             traceback.print_exc()
@@ -205,8 +208,9 @@ def transcribe():
         else:
             addresses = get_potential_addresses(transcribe_text)
 
-        last_transcript = {str(talkgroup_decimal): {"transcript": transcribe_text}}
-        last_transcript_data[short_name] = last_transcript
+        if user_whisper_config_data.get("use_last_as_initial_prompt", False) and call_data:
+            last_transcript = {str(talkgroup_decimal): {"transcript": transcribe_text}}
+            last_transcript_data[short_name] = last_transcript
 
         result = {"success": True, "message": "Transcribe Success!", "transcript": transcribe_text,
                   "addresses": addresses, "segments": segments_data,
