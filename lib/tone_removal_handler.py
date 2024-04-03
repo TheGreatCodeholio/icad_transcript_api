@@ -58,6 +58,8 @@ def cut_tones_from_audio(detected_tones, audio_segment, pre_cut_length=0.5, post
             silence_padding = AudioSegment.silent(duration=audio_length_ms - len(processed_audio))
             processed_audio += silence_padding
 
+
+
         return processed_audio
 
     except Exception as e:
