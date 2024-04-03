@@ -137,18 +137,19 @@ def transcribe():
 
         audio_file.seek(0)  # Rewind the buffer to the beginning
 
-        # audio_segment = pydub.AudioSegment.from_file(io.BytesIO(audio_file.read()))
-        #
-        # if config_data.get("audio_upload", {}).get("cut_tones", 0) == 1:
-        #     detected_tones = detect_tones_in_audio(audio_segment)
-        #     if detected_tones:
-        #         logger.debug(f"Tones Detected In Audio: {detected_tones}")
-        #         audio_segment = cut_tones_from_audio(detected_tones, audio_segment, pre_cut_length=config_data.get("audio_upload", {}).get("cut_pre_tone", 0.5), post_cut_length=config_data.get("audio_upload", {}).get("cut_post_tone", 0.5))
-        #
-        # # Convert the PyDub AudioSegment to bytes
-        # audio_buffer = io.BytesIO()
-        # audio_segment.export(audio_buffer, format="wav")
-        # audio_buffer.seek(0)  # Rewind the buffer to the beginning
+        audio_segment = pydub.AudioSegment.from_file(io.BytesIO(audio_file.read()))
+        original_sample_rate = audio_segment.frame_rate
+
+        if config_data.get("audio_upload", {}).get("cut_tones", 0) == 1:
+            detected_tones = detect_tones_in_audio(audio_segment)
+            if detected_tones:
+                logger.debug(f"Tones Detected In Audio: {detected_tones}")
+                audio_segment = cut_tones_from_audio(detected_tones, audio_segment, pre_cut_length=config_data.get("audio_upload", {}).get("cut_pre_tone", 0.5), post_cut_length=config_data.get("audio_upload", {}).get("cut_post_tone", 0.5))
+
+        # Convert the PyDub AudioSegment to bytes
+        audio_buffer = io.BytesIO()
+        audio_segment.export(audio_buffer, format="wav", parameters=["-ar", str(original_sample_rate)])
+        audio_buffer.seek(0)
 
         try:
 
@@ -158,7 +159,7 @@ def transcribe():
             else:
                 initial_prompt = user_whisper_config_data.get("initial_prompt", None)
 
-            segments, info = model.transcribe(io.BytesIO(audio_file.read()),
+            segments, info = model.transcribe(audio_buffer,
                                               beam_size=user_whisper_config_data.get("beam_size", 5),
                                               best_of=user_whisper_config_data.get("best_of", 5),
                                               language=user_whisper_config_data.get("language", "en"),
