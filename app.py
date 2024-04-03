@@ -97,7 +97,7 @@ def transcribe():
 
         if not audio_file:
             result = {"success": False, "message": "No audio file uploaded"}
-            logger.error("No file uploaded.")
+            logger.error("No audio file uploaded")
             return jsonify(result), 400
 
         # Load and validate JSON file data
@@ -118,14 +118,15 @@ def transcribe():
         else:
             user_whisper_config_data = whisper_config_data
 
-        transmission_sources = call_data.get('srcList', [{
-            "pos": 0,
-            "src": 0,
-            "tag": "Speaker"
-        }])
+        if call_data:
+            transmission_sources = call_data.get('srcList', [{
+                "pos": 0,
+                "src": 0,
+                "tag": "Speaker"
+            }])
 
-        short_name = call_data.get("short_name", "Unknown")
-        talkgroup_decimal = call_data.get("talkgroup_decimal", 0)
+            short_name = call_data.get("short_name", "Unknown")
+            talkgroup_decimal = call_data.get("talkgroup_decimal", 0)
 
         # Validate audio file
         is_valid, validation_response = validate_audio_file(audio_file, config_data.get("audio_upload", {}).get("allowed_extensions", ["audio/x-wav", "audio/x-m4a", "audio/mpeg"]),
