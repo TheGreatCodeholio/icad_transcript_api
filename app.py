@@ -149,7 +149,7 @@ def transcribe():
         audio_segment = apply_agc_with_silence_detection(audio_segment)
         # Convert the PyDub AudioSegment to bytes
         audio_buffer = io.BytesIO()
-        audio_segment.export(audio_buffer, parameters=["-ar", str(original_sample_rate)])
+        audio_segment.export(audio_buffer, format='wav', parameters=["-ar", str(original_sample_rate)])
         audio_buffer.seek(0)
 
         try:
