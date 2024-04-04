@@ -28,7 +28,7 @@ def apply_agc_with_silence_detection(audio_segment, target_peak=-1.0, silence_th
     :param clipping_threshold: The dBFS value above which we consider the signal might clip.
     :return: The processed AudioSegment with AGC applied selectively, ignoring silent segments and avoiding clipping.
     """
-    segments = split_audio(audio_segment, chunk_length=100)  # Split into chunks, e.g., every 1000ms.
+    segments = split_audio(audio_segment, chunk_length=1000)  # Split into chunks, e.g., every 1000ms.
     processed_segments = []
 
     for segment in segments:
