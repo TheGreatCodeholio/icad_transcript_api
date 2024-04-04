@@ -1,6 +1,52 @@
 from icad_tone_detection import tone_detect
 from pydub import AudioSegment
 
+def apply_agc_with_silence_detection(audio_segment, target_peak=-1.0, silence_threshold=-45.0):
+    """
+    Apply Automatic Gain Control (AGC) to an audio segment to normalize its volume, while ignoring silent sections.
+
+    :param audio_segment: The audio segment to process.
+    :param target_peak: The target peak in dBFS that we want to amplify up to but not exceed.
+    :param silence_threshold: The dBFS value below which a segment is considered silent.
+    :return: The processed AudioSegment with AGC applied selectively, ignoring silent segments.
+    """
+    segments = split_audio(audio_segment, chunk_length=1000)  # Split into chunks, e.g., every 1000ms.
+    processed_segments = []
+
+    for segment in segments:
+        segment_peak_dBFS = segment.dBFS  # Get the current peak amplitude of the segment in dBFS.
+
+        # Determine if the segment is silent.
+        is_silent = segment_peak_dBFS < silence_threshold
+
+        if not is_silent:
+            gain_needed = target_peak - segment_peak_dBFS  # Calculate how much gain is needed.
+
+            # Only apply gain if it's positive, indicating the segment is quieter than the target peak.
+            if gain_needed > 0:
+                amplified_segment = segment.apply_gain(gain_needed)
+                processed_segments.append(amplified_segment)
+            else:
+                processed_segments.append(segment)
+        else:
+            # For silent segments, append them unmodified.
+            processed_segments.append(segment)
+
+    # Concatenate all the processed segments back together.
+    processed_audio = sum(processed_segments[1:], processed_segments[0])
+
+    return processed_audio
+
+
+def split_audio(audio_segment, chunk_length=1000):
+    """
+    Splits an audio segment into chunks of a specified length.
+
+    :param audio_segment: The AudioSegment to split.
+    :param chunk_length: The length of each chunk in milliseconds.
+    :return: A list of AudioSegment objects.
+    """
+    return [audio_segment[i:i + chunk_length] for i in range(0, len(audio_segment), chunk_length)]
 
 def detect_tones_in_audio(audio_segment):
     try:

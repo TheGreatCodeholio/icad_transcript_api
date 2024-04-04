@@ -12,7 +12,7 @@ from lib.address_handler import get_potential_addresses
 from lib.config_handler import load_config_file, get_max_content_length, is_model_outdated
 from lib.helpers import load_json, update_config, validate_audio_file
 from lib.logging_handler import CustomLogger
-from lib.tone_removal_handler import cut_tones_from_audio, detect_tones_in_audio
+from lib.tone_removal_handler import cut_tones_from_audio, detect_tones_in_audio, apply_agc_with_silence_detection
 from lib.unit_handler import associate_segments_with_src
 
 app_name = "icad_transcribe"
@@ -146,9 +146,10 @@ def transcribe():
                 logger.debug(f"Tones Detected In Audio: {detected_tones}")
                 audio_segment = cut_tones_from_audio(detected_tones, audio_segment, pre_cut_length=config_data.get("audio_upload", {}).get("cut_pre_tone", 0.5), post_cut_length=config_data.get("audio_upload", {}).get("cut_post_tone", 0.5))
 
+        audio_segment = apply_agc_with_silence_detection(audio_segment)
         # Convert the PyDub AudioSegment to bytes
         audio_buffer = io.BytesIO()
-        audio_segment.export(audio_buffer, format="wav", parameters=["-ar", str(original_sample_rate)])
+        audio_segment.export(audio_buffer, parameters=["-ar", str(original_sample_rate)])
         audio_buffer.seek(0)
 
         try:
