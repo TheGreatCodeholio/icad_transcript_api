@@ -17,7 +17,7 @@ def split_audio(audio_segment, chunk_length=1000):
     return [audio_segment[i * chunk_length_ms:(i + 1) * chunk_length_ms] for i in range(num_chunks)]
 
 
-def apply_agc_with_silence_detection(audio_segment, target_peak=-10.0, silence_threshold=-48.0, clipping_threshold=-10.0):
+def apply_agc_with_silence_detection(audio_segment, target_peak=-1.0, silence_threshold=-48.0, clipping_threshold=-1.0):
     """
     Apply Automatic Gain Control (AGC) to an audio segment to normalize its volume, while ignoring silent sections
     and avoiding clipping.
