@@ -1,14 +1,32 @@
 from icad_tone_detection import tone_detect
 from pydub import AudioSegment
 
-def apply_agc_with_silence_detection(audio_segment, target_peak=-1.0, silence_threshold=-40.0):
+
+def split_audio(audio_segment, chunk_length=1000):
     """
-    Apply Automatic Gain Control (AGC) to an audio segment to normalize its volume, while ignoring silent sections.
+    Splits the audio segment into chunks of the specified length in milliseconds.
+    This is a simple utility function for demonstration and may need adjustment based on actual use case.
+
+    :param audio_segment: The audio segment to split.
+    :param chunk_length: The length of each chunk in milliseconds.
+    :return: A list of audio segments.
+    """
+    # Assuming audio_segment.duration_seconds is the total duration in seconds
+    chunk_length_ms = chunk_length  # chunk_length is already in milliseconds
+    num_chunks = max(1, int(audio_segment.duration_seconds * 1000 // chunk_length_ms))
+    return [audio_segment[i * chunk_length_ms:(i + 1) * chunk_length_ms] for i in range(num_chunks)]
+
+
+def apply_agc_with_silence_detection(audio_segment, target_peak=-1.0, silence_threshold=-40.0, clipping_threshold=0.0):
+    """
+    Apply Automatic Gain Control (AGC) to an audio segment to normalize its volume, while ignoring silent sections
+    and avoiding clipping.
 
     :param audio_segment: The audio segment to process.
     :param target_peak: The target peak in dBFS that we want to amplify up to but not exceed.
     :param silence_threshold: The dBFS value below which a segment is considered silent.
-    :return: The processed AudioSegment with AGC applied selectively, ignoring silent segments.
+    :param clipping_threshold: The dBFS value above which we consider the signal might clip.
+    :return: The processed AudioSegment with AGC applied selectively, ignoring silent segments and avoiding clipping.
     """
     segments = split_audio(audio_segment, chunk_length=1000)  # Split into chunks, e.g., every 1000ms.
     processed_segments = []
@@ -21,12 +39,15 @@ def apply_agc_with_silence_detection(audio_segment, target_peak=-1.0, silence_th
 
         if not is_silent:
             gain_needed = target_peak - segment_peak_dBFS  # Calculate how much gain is needed.
+            # Calculate potential peak after gain to avoid clipping.
+            potential_peak_after_gain = segment_peak_dBFS + gain_needed
 
-            # Only apply gain if it's positive, indicating the segment is quieter than the target peak.
-            if gain_needed > 0:
+            # Only apply gain if it's positive and does not result in clipping.
+            if gain_needed > 0 and potential_peak_after_gain <= clipping_threshold:
                 amplified_segment = segment.apply_gain(gain_needed)
                 processed_segments.append(amplified_segment)
             else:
+                # Append without applying gain if it would cause clipping or no gain needed.
                 processed_segments.append(segment)
         else:
             # For silent segments, append them unmodified.
@@ -36,17 +57,6 @@ def apply_agc_with_silence_detection(audio_segment, target_peak=-1.0, silence_th
     processed_audio = sum(processed_segments[1:], processed_segments[0])
 
     return processed_audio
-
-
-def split_audio(audio_segment, chunk_length=1000):
-    """
-    Splits an audio segment into chunks of a specified length.
-
-    :param audio_segment: The AudioSegment to split.
-    :param chunk_length: The length of each chunk in milliseconds.
-    :return: A list of AudioSegment objects.
-    """
-    return [audio_segment[i:i + chunk_length] for i in range(0, len(audio_segment), chunk_length)]
 
 def detect_tones_in_audio(audio_segment):
     try:
