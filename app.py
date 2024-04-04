@@ -146,7 +146,7 @@ def transcribe():
                 logger.debug(f"Cutting Tones From Audio: {detected_tones}")
                 audio_segment = cut_tones_from_audio(detected_tones, audio_segment, pre_cut_length=config_data.get("audio_upload", {}).get("cut_pre_tone", 0.5), post_cut_length=config_data.get("audio_upload", {}).get("cut_post_tone", 0.5))
 
-        if config_data.get("audio_upload", {}).get("amplify_audio", 0) == 1:
+        if config_data.get("audio_upload", {}).get("amplify_audio_for_vad", 0) == 1 and user_whisper_config_data.get("vad_filter", False):
             logger.debug(f"Amplifying Audio")
             audio_segment = apply_agc_with_silence_detection(audio_segment)
 
