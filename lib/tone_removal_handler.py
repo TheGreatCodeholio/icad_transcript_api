@@ -1,7 +1,7 @@
 from icad_tone_detection import tone_detect
 from pydub import AudioSegment
 
-def apply_agc_with_silence_detection(audio_segment, target_peak=-1.0, silence_threshold=-45.0):
+def apply_agc_with_silence_detection(audio_segment, target_peak=-1.0, silence_threshold=-40.0):
     """
     Apply Automatic Gain Control (AGC) to an audio segment to normalize its volume, while ignoring silent sections.
 
