@@ -143,10 +143,11 @@ def transcribe():
         if config_data.get("audio_upload", {}).get("cut_tones", 0) == 1:
             detected_tones = detect_tones_in_audio(audio_segment)
             if detected_tones:
-                logger.debug(f"Tones Detected In Audio: {detected_tones}")
+                logger.debug(f"Cutting Tones From Audio: {detected_tones}")
                 audio_segment = cut_tones_from_audio(detected_tones, audio_segment, pre_cut_length=config_data.get("audio_upload", {}).get("cut_pre_tone", 0.5), post_cut_length=config_data.get("audio_upload", {}).get("cut_post_tone", 0.5))
 
         if config_data.get("audio_upload", {}).get("amplify_audio", 0) == 1:
+            logger.debug(f"Amplifying Audio")
             audio_segment = apply_agc_with_silence_detection(audio_segment)
 
         # Convert the PyDub AudioSegment to bytes
