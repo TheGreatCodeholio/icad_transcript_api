@@ -14,7 +14,8 @@ default_config = {
         "max_file_size": 3,
         "cut_tones": 0,
         "cut_pre_tone": 0.5,
-        "cut_post_tones": 0.5
+        "cut_post_tones": 0.5,
+        "amplify_audio": 0
     },
     "whisper": {
         "device": "cuda",
