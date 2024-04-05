@@ -15,7 +15,7 @@ default_config = {
         "cut_tones": 0,
         "cut_pre_tone": 0.5,
         "cut_post_tones": 0.5,
-        "amplify_audio_for_vad": 0
+        "amplify_audio_if_vad": 0
     },
     "whisper": {
         "device": "cuda",
