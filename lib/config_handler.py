@@ -14,8 +14,7 @@ default_config = {
         "max_file_size": 3,
         "cut_tones": 0,
         "cut_pre_tone": 0.5,
-        "cut_post_tones": 0.5,
-        "amplify_audio_if_vad": 0
+        "cut_post_tones": 0.5
     },
     "whisper": {
         "device": "cuda",
@@ -25,12 +24,13 @@ default_config = {
         "language": "en",
         "beam_size": 5,
         "best_of": 5,
+        "amplify_audio": 0,
         "vad_filter": True,
         "vad_parameters": {
-            "threshold": 0.5,
+            "threshold": 0.3,
             "min_speech_duration_ms": 250,
             "max_speech_duration_s": 3600,
-            "min_silence_duration_ms": 2000,
+            "min_silence_duration_ms": 400,
             "window_size_samples": 1024,
             "speech_pad_ms": 400
         }
