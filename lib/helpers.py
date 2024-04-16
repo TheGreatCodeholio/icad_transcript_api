@@ -68,10 +68,10 @@ def validate_audio_file(audio_file, allowed_mimetypes, max_audio_length):
 
 
 def organize_detected_tones(detected_tone_data):
-    detected_tones = []
+    final_detected_tones = []
     for key, tones in detected_tone_data.items():
-        detected_tones.extend(tones)
-    return detected_tones
+        final_detected_tones.extend(tones)
+    return final_detected_tones
 
 
 def inject_alert_tone_segements(segments, detected_tones):
