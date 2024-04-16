@@ -90,7 +90,8 @@ def inject_alert_tone_segements(whisper_segments, detected_tones):
         final_segments.append({
             "text": "[Alert Tones]",
             "start": tone['start'],
-            "end": tone['end']
+            "end": tone['end'],
+            "words": [{"start": tone['start'], "end": tone['end'], "word_id": 1, "word": "[Alert Tones]"}]
         })
 
         # Skip over any segments that overlap with the current tone
