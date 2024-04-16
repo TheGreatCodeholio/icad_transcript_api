@@ -77,26 +77,29 @@ def organize_detected_tones(detected_tone_data):
 def inject_alert_tone_segements(whisper_segments, detected_tones):
     whisper_segments = list(whisper_segments)
     final_segments = []
-    index = 0
+    index = 0  # Index to track the current segment position
 
+    # Iterate over each detected tone
     for tone in detected_tones:
-        # Add normal text segments that occur before the current tone
+        # Ensure we add all segments before the tone starts
         while index < len(whisper_segments) and whisper_segments[index]['end'] <= tone['start']:
             final_segments.append(whisper_segments[index])
             index += 1
 
-        # Add the alert tone segment
+        # Insert the alert tone segment
         final_segments.append({
-            "text": "Alert Tones",
+            "text": "[Alert Tones]",
             "start": tone['start'],
             "end": tone['end']
         })
 
-        # Skip any segments that the tone overlaps
+        # Skip over any segments that overlap with the current tone
         while index < len(whisper_segments) and whisper_segments[index]['start'] < tone['end']:
             index += 1
 
-    # Add any remaining segments after the last tone
-    final_segments.extend(whisper_segments[index:])
+    # After handling all tones, add the remaining segments that come after the last tone
+    while index < len(whisper_segments):
+        final_segments.append(whisper_segments[index])
+        index += 1
 
     return final_segments
