@@ -75,6 +75,7 @@ def organize_detected_tones(detected_tone_data):
 
 
 def inject_alert_tone_segements(whisper_segments, detected_tones):
+    whisper_segments = list(whisper_segments)
     final_segments = []
     index = 0
 
