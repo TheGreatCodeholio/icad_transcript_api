@@ -66,3 +66,36 @@ def validate_audio_file(audio_file, allowed_mimetypes, max_audio_length):
 
     return True, "Valid audio file"
 
+
+def organize_detected_tones(detected_tone_data):
+    detected_tones = []
+    for key, tones in detected_tone_data.items():
+        detected_tones.extend(tones)
+    return detected_tones
+
+
+def inject_alert_tone_segements(segments, detected_tones):
+    final_segments = []
+    index = 0
+
+    for tone in detected_tones:
+        # Add normal text segments that occur before the current tone
+        while index < len(segments) and segments[index]['end'] <= tone['start']:
+            final_segments.append(segments[index])
+            index += 1
+
+        # Add the alert tone segment
+        final_segments.append({
+            "text": "Alert Tones",
+            "start": tone['start'],
+            "end": tone['end']
+        })
+
+        # Skip any segments that the tone overlaps
+        while index < len(segments) and segments[index]['start'] < tone['end']:
+            index += 1
+
+    # Add any remaining segments after the last tone
+    final_segments.extend(segments[index:])
+
+    return final_segments
