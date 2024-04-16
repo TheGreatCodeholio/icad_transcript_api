@@ -208,7 +208,7 @@ def transcribe():
                      "end": segment.end})
 
             if config_data.get("audio_upload", {}).get("cut_tones", 0) == 1:
-                segments_data = inject_alert_tone_segements(segments, detected_tones_final)
+                segments_data = inject_alert_tone_segements(segments_data, detected_tones_final)
 
             if call_data:
                 segments_data = associate_segments_with_src(segments_data, transmission_sources)
