@@ -207,11 +207,11 @@ def transcribe():
                      "start": segment.start,
                      "end": segment.end})
 
-            if call_data:
-                segments_data = associate_segments_with_src(segments_data, transmission_sources)
-
             if config_data.get("audio_upload", {}).get("cut_tones", 0) == 1:
                 segments_data = inject_alert_tone_segements(segments, detected_tones_final)
+
+            if call_data:
+                segments_data = associate_segments_with_src(segments_data, transmission_sources)
 
             transcribe_text = " ".join(segment['text'] for segment in segments_data)
 
