@@ -24,7 +24,7 @@ default_config = {
         "language": "en",
         "beam_size": 5,
         "best_of": 5,
-        "amplify_audio": 0,
+        "amplify_audio": False,
         "vad_filter": True,
         "vad_parameters": {
             "threshold": 0.3,

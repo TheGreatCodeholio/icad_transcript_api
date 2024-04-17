@@ -11,7 +11,7 @@ from faster_whisper import WhisperModel, download_model
 from lib.address_handler import get_potential_addresses
 from lib.config_handler import load_config_file, get_max_content_length, is_model_outdated
 from lib.helpers import load_json, update_config, validate_audio_file, organize_detected_tones, \
-    inject_alert_tone_segements
+    inject_alert_tone_segments
 from lib.logging_handler import CustomLogger
 from lib.tone_removal_handler import cut_tones_from_audio, detect_tones_in_audio, apply_agc_with_silence_detection
 from lib.unit_handler import associate_segments_with_src
@@ -94,19 +94,28 @@ def transcribe():
         audio_file = request.files.get('audioFile')
         json_file = request.files.get('jsonFile')
         user_whisper_config_data = request.form.get('whisper_config_data')
-        call_data = None
+        detected_tones = {"two_tone": [], "long_tone": [], "hl_tone": []}
 
         if not audio_file:
             result = {"success": False, "message": "No audio file uploaded"}
             logger.error("No audio file uploaded")
             return jsonify(result), 400
 
+        if not json_file:
+            result = {"success": False, "message": "No metadata file uploaded"}
+            logger.error("No metadata file uploaded")
+            return jsonify(result), 400
         # Load and validate JSON file data
-        if json_file:
-            call_data, error = load_json(json_file)
-            if error:
-                logger.error(error)
-                return jsonify({"success": False, "message": error}), 400
+
+        call_data, error = load_json(json_file)
+        if error:
+            logger.error(error)
+            return jsonify({"success": False, "message": error}), 400
+
+        if not call_data:
+            result = {"success": False, "message": "Unable to load call metadata."}
+            logger.error("Unable to load call metadata.")
+            return jsonify(result), 400
 
         # Update config data with user input
         if user_whisper_config_data:
@@ -119,15 +128,14 @@ def transcribe():
         else:
             user_whisper_config_data = whisper_config_data
 
-        if call_data:
-            transmission_sources = call_data.get('srcList', [{
-                "pos": 0,
-                "src": 0,
-                "tag": "Speaker"
-            }])
+        transmission_sources = call_data.get('srcList', [{
+            "pos": 0,
+            "src": 0,
+            "tag": "Speaker"
+        }])
 
-            short_name = call_data.get("short_name", "Unknown")
-            talkgroup_decimal = call_data.get("talkgroup_decimal", 0)
+        short_name = call_data.get("short_name", "unknown")
+        talkgroup_decimal = call_data.get("talkgroup_decimal", 0)
 
         # Validate audio file
         is_valid, validation_response = validate_audio_file(audio_file, config_data.get("audio_upload", {}).get(
@@ -144,15 +152,15 @@ def transcribe():
         original_sample_rate = audio_segment.frame_rate
 
         if config_data.get("audio_upload", {}).get("cut_tones", 0) == 1:
-            detected_tones = detect_tones_in_audio(audio_segment)
-            detected_tones_final = organize_detected_tones(detected_tones)
-            if detected_tones:
-                logger.debug(f"Cutting Tones From Audio: {detected_tones}")
-                audio_segment = cut_tones_from_audio(detected_tones, audio_segment,
-                                                     pre_cut_length=config_data.get("audio_upload", {}).get(
-                                                         "cut_pre_tone", 0.5),
-                                                     post_cut_length=config_data.get("audio_upload", {}).get(
-                                                         "cut_post_tone", 0.5))
+            if call_data.get("tones", {}):
+                detected_tones = call_data.get("tones", {})
+                if detected_tones:
+                    logger.debug(f"Cutting Tones From Audio: {detected_tones}")
+                    audio_segment = cut_tones_from_audio(detected_tones, audio_segment,
+                                                         pre_cut_length=config_data.get("audio_upload", {}).get(
+                                                             "cut_pre_tone", 0.5),
+                                                         post_cut_length=config_data.get("audio_upload", {}).get(
+                                                             "cut_post_tone", 0.5))
 
         if user_whisper_config_data.get("amplify_audio", False):
             logger.debug(f"Amplifying Audio")
@@ -208,10 +216,9 @@ def transcribe():
                      "end": segment.end})
 
             if config_data.get("audio_upload", {}).get("cut_tones", 0) == 1:
-                segments_data = inject_alert_tone_segements(segments_data, detected_tones_final)
+                segments_data = inject_alert_tone_segments(segments_data, detected_tones)
 
-            if call_data:
-                segments_data = associate_segments_with_src(segments_data, transmission_sources)
+            segments_data = associate_segments_with_src(segments_data, transmission_sources)
 
             transcribe_text = " ".join(segment['text'] for segment in segments_data)
 
@@ -227,7 +234,7 @@ def transcribe():
         else:
             addresses = get_potential_addresses(transcribe_text)
 
-        if user_whisper_config_data.get("use_last_as_initial_prompt", False) and call_data:
+        if user_whisper_config_data.get("use_last_as_initial_prompt", False):
             last_transcript = {str(talkgroup_decimal): {"transcript": transcribe_text}}
             last_transcript_data[short_name] = last_transcript
 
