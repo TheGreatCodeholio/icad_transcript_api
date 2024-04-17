@@ -10,10 +10,9 @@ from faster_whisper import WhisperModel, download_model
 
 from lib.address_handler import get_potential_addresses
 from lib.config_handler import load_config_file, get_max_content_length, is_model_outdated
-from lib.helpers import load_json, update_config, validate_audio_file, organize_detected_tones, \
-    inject_alert_tone_segments
+from lib.helpers import load_json, update_config, validate_audio_file, inject_alert_tone_segments
 from lib.logging_handler import CustomLogger
-from lib.tone_removal_handler import cut_tones_from_audio, detect_tones_in_audio, apply_agc_with_silence_detection
+from lib.tone_removal_handler import cut_tones_from_audio, apply_agc_with_silence_detection
 from lib.unit_handler import associate_segments_with_src
 
 app_name = "icad_transcribe"

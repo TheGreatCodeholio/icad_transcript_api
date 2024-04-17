@@ -60,20 +60,6 @@ def apply_agc_with_silence_detection(audio_segment, target_peak=-5.0, silence_th
     return processed_audio
 
 
-def detect_tones_in_audio(audio_segment):
-    try:
-        tone_detect_result = tone_detect(audio_segment)
-        detected_tones = {
-            "two_tone": tone_detect_result.two_tone_result,
-            "long_tone": tone_detect_result.long_result,
-            "warble_tone": tone_detect_result.hi_low_result
-        }
-        return detected_tones
-    except Exception as e:
-        print(f"Failed To Detect Tones: {e}")
-        return None
-
-
 def cut_tones_from_audio(detected_tones, audio_segment, pre_cut_length=0.5, post_cut_length=0.5):
     try:
         # Initialize a new, empty audio segment to build the processed audio
