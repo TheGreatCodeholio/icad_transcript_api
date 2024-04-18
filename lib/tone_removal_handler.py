@@ -1,4 +1,3 @@
-from icad_tone_detection import tone_detect
 from pydub import AudioSegment
 
 
