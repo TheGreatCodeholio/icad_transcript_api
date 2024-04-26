@@ -123,9 +123,11 @@ def transcribe():
                 user_whisper_config_data = update_config(whisper_config_data, user_whisper_config_data)
             except json.JSONDecodeError:
                 logger.exception("Error parsing User Whisper Config Data")
-                return jsonify({"success": False, "message": "Invalid JSON data"}), 400
+                return jsonify({"success": False, "message": "Invalid Custom Whisper Config JSON data"}), 400
         else:
             user_whisper_config_data = whisper_config_data
+
+        logger.debug(f"Using Whisper Configuration: {user_whisper_config_data}")
 
         transmission_sources = call_data.get('srcList', [{
             "pos": 0,
