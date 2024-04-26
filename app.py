@@ -162,7 +162,7 @@ def transcribe():
 
         if user_whisper_config_data.get("amplify_audio", False):
             logger.debug(f"Amplifying Audio")
-            audio_segment = apply_agc_with_silence_detection(audio_segment)
+            audio_segment = apply_agc_with_silence_detection(audio_segment, target_peak=user_whisper_config_data.get("amplify_target_peak", -25), silence_threshold=user_whisper_config_data.get("amplify_silence_threshold", -48), clipping_threshold=user_whisper_config_data.get("amplify_clipping_threshold", -12))
 
         # Convert the PyDub AudioSegment to bytes
         audio_buffer = io.BytesIO()

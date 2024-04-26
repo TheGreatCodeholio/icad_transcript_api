@@ -29,6 +29,9 @@ default_config = {
         "cut_pre_tone": 0.5,
         "cut_post_tone": 0.5,
         "amplify_audio": False,
+        "amplify_target_peak": -22,
+        "amplify_silence_threshold": -40,
+        "amplify_clipping_threshold": -11,
         "vad_filter": True,
         "vad_parameters": {
             "threshold": 0.3,

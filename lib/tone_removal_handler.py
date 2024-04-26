@@ -16,42 +16,37 @@ def split_audio(audio_segment, chunk_length=1000):
     return [audio_segment[i * chunk_length_ms:(i + 1) * chunk_length_ms] for i in range(num_chunks)]
 
 
-def apply_agc_with_silence_detection(audio_segment, target_peak=-5.0, silence_threshold=-48.0,
-                                     clipping_threshold=-1.0):
+def apply_agc_with_silence_detection(audio_segment, target_peak=-25, clipping_threshold=-12, silence_threshold=-48):
     """
     Apply Automatic Gain Control (AGC) to an audio segment to normalize its volume, while ignoring silent sections
     and avoiding clipping.
 
     :param audio_segment: The audio segment to process.
     :param target_peak: The target peak in dBFS that we want to amplify up to but not exceed.
-    :param silence_threshold: The dBFS value below which a segment is considered silent.
     :param clipping_threshold: The dBFS value above which we consider the signal might clip.
+    :param silence_threshold: The dBFS value below which a segment is considered silent.
     :return: The processed AudioSegment with AGC applied selectively, ignoring silent segments and avoiding clipping.
     """
-    segments = split_audio(audio_segment, chunk_length=1000)  # Split into chunks, e.g., every 1000ms.
+    segments = split_audio(audio_segment, chunk_length=100)  # Split into chunks, e.g., every 1000ms.
     processed_segments = []
 
     for segment in segments:
         segment_peak_dBFS = segment.dBFS  # Get the current peak amplitude of the segment in dBFS.
-
-        # Determine if the segment is silent.
-        is_silent = segment_peak_dBFS < silence_threshold
+        is_silent = segment_peak_dBFS < silence_threshold  # Determine if the segment is silent.
 
         if not is_silent:
-            gain_needed = target_peak - segment_peak_dBFS  # Calculate how much gain is needed.
-            # Calculate potential peak after gain to avoid clipping.
-            potential_peak_after_gain = segment_peak_dBFS + gain_needed
+            # Calculate how much gain is needed to reach the target peak, capped by the clipping threshold.
+            max_gain = clipping_threshold - segment_peak_dBFS
+            gain_needed = min(target_peak - segment_peak_dBFS, max_gain)
 
-            # Only apply gain if it's positive and does not result in clipping.
-            if gain_needed > 0 and potential_peak_after_gain <= clipping_threshold:
+            # Only apply gain if it doesn't lead to clipping and is a positive value.
+            if gain_needed > 0:
                 amplified_segment = segment.apply_gain(gain_needed)
                 processed_segments.append(amplified_segment)
             else:
-                # Append without applying gain if it would cause clipping or no gain needed.
                 processed_segments.append(segment)
         else:
-            # For silent segments, append them unmodified.
-            processed_segments.append(segment)
+            processed_segments.append(segment)  # Append silent segments unmodified.
 
     # Concatenate all the processed segments back together.
     processed_audio = sum(processed_segments[1:], processed_segments[0])
