@@ -1,6 +1,7 @@
 import io
 import json
 from os.path import splitext
+import copy
 
 import magic
 from pydub import AudioSegment
@@ -50,7 +51,9 @@ def update_config(default_config, user_config):
                 d[k] = v
         return d
 
-    return update(default_config.copy(), user_config)
+    # Ensure we are working with a deep copy of the default_config to avoid modifying it directly
+    default_copy = copy.deepcopy(default_config)
+    return update(default_copy, user_config)
 
 
 def validate_audio_file(audio_file, allowed_mimetypes, max_audio_length):
