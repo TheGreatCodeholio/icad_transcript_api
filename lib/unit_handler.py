@@ -1,6 +1,7 @@
 
 def associate_segments_with_src(segments, src_list):
     if not src_list:
+        # If there is no src_list provided, return segments with default src
         return [{
             "pos": 0,
             "src": 0,
@@ -10,35 +11,29 @@ def associate_segments_with_src(segments, src_list):
     # Sort srcList by 'pos' to ensure it is in the correct order
     src_list_sorted = sorted(src_list, key=lambda x: x['pos'])
 
+    # Append a large number to handle segments beyond the last src position
+    src_list_sorted.append({'pos': float('inf'), 'src': -1, 'tag': ''})
+
+    src_index = 0
+
     for segment in segments:
         segment_start, segment_end = segment['start'], segment['end']
         src_for_segment = None
 
-        # Initialize variables to find the closest src before segment start
-        closest_src_before_segment_start = None
-        min_diff = float('inf')
+        # Move the src_index to the correct src covering the segment_start
+        while src_index < len(src_list_sorted) - 1 and src_list_sorted[src_index + 1]['pos'] <= segment_start:
+            src_index += 1
 
-        for src in src_list_sorted:
-            src_pos = src['pos']
-
-            # Ensure the src starts before the segment ends
-            if src_pos <= segment_end:
-                diff = segment_start - src_pos
-
-                # Check if this src is closer to the segment start than previous ones
-                if 0 <= diff < min_diff:
-                    closest_src_before_segment_start = src
-                    min_diff = diff
+        # Check the current src covers the segment
+        if src_list_sorted[src_index]['pos'] <= segment_end:
+            current_src = src_list_sorted[src_index]
+            if current_src.get('tag'):
+                src_for_segment = current_src['tag']
             else:
-                # Since src_list is sorted, break the loop once we pass segment_end
-                break
-
-        if closest_src_before_segment_start:
-            # Assign the found src to the entire segment
-            if closest_src_before_segment_start.get('tag') != '':
-                src_for_segment = closest_src_before_segment_start.get("tag")
-            else:
-                src_for_segment = closest_src_before_segment_start['src'] if closest_src_before_segment_start['src'] != -1 else 0
+                src_for_segment = current_src['src'] if current_src['src'] != -1 else 0
+        else:
+            # If no valid src is found, you might set a default or handle it accordingly
+            src_for_segment = 0
 
         segment['unit_tag'] = src_for_segment
 

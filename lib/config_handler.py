@@ -11,10 +11,7 @@ default_config = {
     "audio_upload": {
         "allowed_extensions": ["audio/x-wav", "audio/x-m4a", "audio/mpeg"],
         "max_audio_length": 300,
-        "max_file_size": 3,
-        "cut_tones": 0,
-        "cut_pre_tone": 0.5,
-        "cut_post_tones": 0.5
+        "max_file_size": 3
     },
     "whisper": {
         "device": "cuda",
@@ -24,6 +21,13 @@ default_config = {
         "language": "en",
         "beam_size": 5,
         "best_of": 5,
+        "initial_prompt": None,
+        "use_last_as_initial_prompt": False,
+        "word_timestamps": False,
+        "cut_tones": False,
+        "show_tone_text": False,
+        "cut_pre_tone": 0.5,
+        "cut_post_tone": 0.5,
         "amplify_audio": False,
         "vad_filter": True,
         "vad_parameters": {

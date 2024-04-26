@@ -150,15 +150,14 @@ def transcribe():
         audio_segment = pydub.AudioSegment.from_file(io.BytesIO(audio_file.read()))
         original_sample_rate = audio_segment.frame_rate
 
-        if config_data.get("audio_upload", {}).get("cut_tones", 0) == 1:
+        if user_whisper_config_data.get("cut_tones", False):
             if call_data.get("tones", {}):
-                detected_tones = call_data.get("tones", {})
-                if detected_tones:
-                    logger.debug(f"Cutting Tones From Audio: {detected_tones}")
-                    audio_segment = cut_tones_from_audio(detected_tones, audio_segment,
-                                                         pre_cut_length=config_data.get("audio_upload", {}).get(
+                detected_tones = call_data["tones"]
+                logger.debug(f"Cutting Tones From Audio: {detected_tones}")
+                audio_segment = cut_tones_from_audio(detected_tones, audio_segment,
+                                                         pre_cut_length=user_whisper_config_data.get(
                                                              "cut_pre_tone", 0.5),
-                                                         post_cut_length=config_data.get("audio_upload", {}).get(
+                                                         post_cut_length=user_whisper_config_data.get(
                                                              "cut_post_tone", 0.5))
 
         if user_whisper_config_data.get("amplify_audio", False):
@@ -214,7 +213,7 @@ def transcribe():
                      "start": segment.start,
                      "end": segment.end})
 
-            if config_data.get("audio_upload", {}).get("cut_tones", 0) == 1:
+            if user_whisper_config_data.get("cut_tones", False) and user_whisper_config_data.get("show_tone_text", False):
                 segments_data = inject_alert_tone_segments(segments_data, detected_tones)
 
             segments_data = associate_segments_with_src(segments_data, transmission_sources)
