@@ -100,21 +100,14 @@ def transcribe():
             logger.error("No audio file uploaded")
             return jsonify(result), 400
 
-        if not json_file:
-            result = {"success": False, "message": "No metadata file uploaded"}
-            logger.error("No metadata file uploaded")
-            return jsonify(result), 400
-        # Load and validate JSON file data
-
-        call_data, error = load_json(json_file)
-        if error:
-            logger.error(error)
-            return jsonify({"success": False, "message": error}), 400
-
-        if not call_data:
-            result = {"success": False, "message": "Unable to load call metadata."}
-            logger.error("Unable to load call metadata.")
-            return jsonify(result), 400
+        if json_file:
+            # Load and validate JSON file data
+            call_data, error = load_json(json_file)
+            if error:
+                logger.error(error)
+                return jsonify({"success": False, "message": error}), 400
+        else:
+            call_data = {}
 
         # Update config data with user input
         if user_whisper_config_data:
