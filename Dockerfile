@@ -8,7 +8,7 @@ WORKDIR /app
 # Copy the current directory contents into the container at /usr/src/app
 COPY app.py /app
 COPY lib /app/lib
-COPY static /app/static
+# COPY static /app/static
 COPY templates /app/templates
 COPY requirements.txt /app
 

@@ -1,3 +1,5 @@
+import json
+
 import requests
 from json import JSONDecodeError
 
@@ -7,23 +9,28 @@ JSON_FILE_PATH = 'test_audio/100-1711131089_155250000.0-call_20424.json'
 URL = "http://localhost:9912/transcribe"
 
 WHISPER_CONFIG_DATA = {
-    "whisper_config_data": {
-        "language": "en",
-        "beam_size": 5,
-        "best_of": 5,
-        "initial_prompt": False,
-        "use_last_as_initial_prompt": False,
-        "word_timestamps": True,
-        "amplify_audio": False,
-        "vad_filter": True,
-        "vad_parameters": {
-            "threshold": 0.3,
-            "min_speech_duration_ms": 250,
-            "max_speech_duration_s": 3600,
-            "min_silence_duration_ms": 400,
-            "window_size_samples": 1024,
-            "speech_pad_ms": 400
-        }
+    "language": "en",
+    "beam_size": 5,
+    "best_of": 5,
+    "initial_prompt": None,
+    "use_last_as_initial_prompt": False,
+    "word_timestamps": False,
+    "cut_tones": False,
+    "show_tone_text": False,
+    "cut_pre_tone": 0.5,
+    "cut_post_tone": 0.5,
+    "amplify_audio": False,
+    "amplify_target_peak": -22,
+    "amplify_silence_threshold": -40,
+    "amplify_clipping_threshold": -11,
+    "vad_filter": True,
+    "vad_parameters": {
+        "threshold": 0.3,
+        "min_speech_duration_ms": 250,
+        "max_speech_duration_s": 3600,
+        "min_silence_duration_ms": 400,
+        "window_size_samples": 1024,
+        "speech_pad_ms": 400
     }
 }
 
@@ -39,9 +46,15 @@ def post_audio_and_json(audio_file_path, json_file_path, url, config_data):
     - config_data (dict): JSON configuration data for the request.
     """
     try:
+        # Prepare the configuration data by converting it to a JSON string
+        config_json_string = json.dumps(config_data)
+
+        # Prepare the data payload with the JSON configuration as a string
+        data = {'whisper_config_data': config_json_string}
+
         with open(audio_file_path, 'rb') as audio_file, open(json_file_path, 'rb') as json_file:
             files = {'audioFile': audio_file, 'jsonFile': json_file}
-            response = requests.post(url, files=files, json=config_data)
+            response = requests.post(url, files=files, data=data)
 
             try:
                 response_data = response.json()
