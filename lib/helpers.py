@@ -73,16 +73,17 @@ def validate_audio_file(audio_file, allowed_mimetypes, max_audio_length):
 def inject_alert_tone_segments(whisper_segments, detected_tones):
     whisper_segments = list(whisper_segments)
     alert_segments = []
+    for tone_type in detected_tones:
 
-    for tone in detected_tones:
-        alert_segments.append({
-            "end": tone["end"],
-            "segment_id": len(whisper_segments) + len(alert_segments) + 1,
-            "start": tone["start"],
-            "text": "[Alert Tones]",
-            "unit_tag": 0,
-            "words": []
-        })
+        for tone in detected_tones.get(tone_type, []):
+            alert_segments.append({
+                "end": tone["end"],
+                "segment_id": len(whisper_segments) + len(alert_segments) + 1,
+                "start": tone["start"],
+                "text": "[Alert Tones]",
+                "unit_tag": 0,
+                "words": []
+            })
 
     # Merge the new segments with existing segments and sort by start time
     all_segments = whisper_segments + alert_segments
