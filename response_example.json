@@ -1,171 +1,91 @@
 {
-  "freq": 462950000,
-  "freq_error": -3145,
-  "signal": -19,
-  "noise": -63,
-  "source_num": 5,
-  "recorder_num": 8,
-  "tdma_slot": 0,
-  "phase2_tdma": 0,
-  "start_time": 1715451604,
-  "stop_time": 1715451645,
-  "emergency": 0,
-  "priority": 0,
-  "mode": 0,
-  "duplex": 0,
-  "encrypted": 0,
-  "call_length": 40,
-  "talkgroup": 200,
-  "talkgroup_tag": "EMS Med-9",
-  "talkgroup_description": "EMS Dispatch Med-9",
-  "talkgroup_group_tag": "EMS Dispatch",
-  "talkgroup_group": "EMS",
-  "audio_type": "analog",
-  "short_name": "bradford-pa",
-  "freqList": [
+  "addresses": [
+    "115 Broad Street Apartment 4"
+  ],
+  "message": "Transcribe Success!",
+  "process_time_seconds": 1.43,
+  "segments": [
     {
-      "freq": 462950000,
-      "time": 1715451604,
-      "pos": 0.0,
-      "len": 39.951,
-      "error_count": 0,
-      "spike_count": 0
+      "end": 9.3,
+      "segment_id": 1,
+      "start": 0.0,
+      "text": "Greater Valley EMS Waverly",
+      "unit_tag": 0,
+      "words": []
+    },
+    {
+      "end": 11.620000000000001,
+      "segment_id": 2,
+      "start": 9.3,
+      "text": "115 Broad Street",
+      "unit_tag": 0,
+      "words": []
+    },
+    {
+      "end": 13.14,
+      "segment_id": 3,
+      "start": 11.620000000000001,
+      "text": "Apartment 4 Respiratory",
+      "unit_tag": 0,
+      "words": []
+    },
+    {
+      "end": 25.240000000000002,
+      "segment_id": 4,
+      "start": 13.14,
+      "text": "Greater Valley EMS Waverly",
+      "unit_tag": 0,
+      "words": []
+    },
+    {
+      "end": 27.84,
+      "segment_id": 5,
+      "start": 25.240000000000002,
+      "text": "115 Broad Street",
+      "unit_tag": 0,
+      "words": []
+    },
+    {
+      "end": 28.84,
+      "segment_id": 6,
+      "start": 27.84,
+      "text": "Apartment 4",
+      "unit_tag": 0,
+      "words": []
+    },
+    {
+      "end": 31.12,
+      "segment_id": 7,
+      "start": 28.84,
+      "text": "363-year-old female",
+      "unit_tag": 0,
+      "words": []
+    },
+    {
+      "end": 32.5,
+      "segment_id": 8,
+      "start": 31.12,
+      "text": "Respiratory difficulty",
+      "unit_tag": 0,
+      "words": []
+    },
+    {
+      "end": 36.22,
+      "segment_id": 9,
+      "start": 32.5,
+      "text": "Call Team Sir Tioga",
+      "unit_tag": 0,
+      "words": []
+    },
+    {
+      "end": 38.2,
+      "segment_id": 10,
+      "start": 36.22,
+      "text": "Delta Priority 1420",
+      "unit_tag": 0,
+      "words": []
     }
   ],
-  "srcList": [
-    {
-      "src": -1,
-      "time": 1715451604,
-      "pos": 0.0,
-      "emergency": 0,
-      "signal_system": "",
-      "tag": ""
-    }
-  ],
-  "filename": "200-1715451609_462950000.0-call_19067.wav",
-  "tones": {
-    "two_tone": [
-      {
-        "tone_id": "qc_1",
-        "detected": [
-          721.4,
-          1119.7
-        ],
-        "start": 0.948,
-        "end": 5.038
-      },
-      {
-        "tone_id": "qc_2",
-        "detected": [
-          721.4,
-          1119.7
-        ],
-        "start": 15.561,
-        "end": 19.651
-      }
-    ],
-    "long_tone": [],
-    "hi_low_tone": [
-      {
-        "tone_id": "hl_1",
-        "detected": [
-          2196.4,
-          2217.9
-        ],
-        "start": 33.268,
-        "end": 34.913
-      }
-    ]
-  },
-  "transcript": {
-    "addresses": [
-      "115 Broad Street Apartment 4"
-    ],
-    "message": "Transcribe Success!",
-    "process_time_seconds": 1.43,
-    "segments": [
-      {
-        "end": 9.3,
-        "segment_id": 1,
-        "start": 0.0,
-        "text": "Greater Valley EMS Waverly",
-        "unit_tag": 0,
-        "words": []
-      },
-      {
-        "end": 11.620000000000001,
-        "segment_id": 2,
-        "start": 9.3,
-        "text": "115 Broad Street",
-        "unit_tag": 0,
-        "words": []
-      },
-      {
-        "end": 13.14,
-        "segment_id": 3,
-        "start": 11.620000000000001,
-        "text": "Apartment 4 Respiratory",
-        "unit_tag": 0,
-        "words": []
-      },
-      {
-        "end": 25.240000000000002,
-        "segment_id": 4,
-        "start": 13.14,
-        "text": "Greater Valley EMS Waverly",
-        "unit_tag": 0,
-        "words": []
-      },
-      {
-        "end": 27.84,
-        "segment_id": 5,
-        "start": 25.240000000000002,
-        "text": "115 Broad Street",
-        "unit_tag": 0,
-        "words": []
-      },
-      {
-        "end": 28.84,
-        "segment_id": 6,
-        "start": 27.84,
-        "text": "Apartment 4",
-        "unit_tag": 0,
-        "words": []
-      },
-      {
-        "end": 31.12,
-        "segment_id": 7,
-        "start": 28.84,
-        "text": "363-year-old female",
-        "unit_tag": 0,
-        "words": []
-      },
-      {
-        "end": 32.5,
-        "segment_id": 8,
-        "start": 31.12,
-        "text": "Respiratory difficulty",
-        "unit_tag": 0,
-        "words": []
-      },
-      {
-        "end": 36.22,
-        "segment_id": 9,
-        "start": 32.5,
-        "text": "Call Team Sir Tioga",
-        "unit_tag": 0,
-        "words": []
-      },
-      {
-        "end": 38.2,
-        "segment_id": 10,
-        "start": 36.22,
-        "text": "Delta Priority 1420",
-        "unit_tag": 0,
-        "words": []
-      }
-    ],
-    "success": true,
-    "transcript": "Greater Valley EMS Waverly 115 Broad Street Apartment 4 Respiratory Greater Valley EMS Waverly 115 Broad Street Apartment 4 363-year-old female Respiratory difficulty Call Team Sir Tioga Delta Priority 1420"
-  }
+  "success": true,
+  "transcript": "Greater Valley EMS Waverly 115 Broad Street Apartment 4 Respiratory Greater Valley EMS Waverly 115 Broad Street Apartment 4 363-year-old female Respiratory difficulty Call Team Sir Tioga Delta Priority 1420"
 }

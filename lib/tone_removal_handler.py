@@ -62,7 +62,7 @@ def cut_tones_from_audio(detected_tones, audio_segment, pre_cut_length=0.5, post
         # Gather all tone information in one list and sort them by their start time
         all_tones = sorted(
             detected_tones.get('two_tone', []) +
-            detected_tones.get('warble_tone', []) +
+            detected_tones.get('hi_low_tone', []) +
             detected_tones.get('long_tone', []),
             key=lambda x: x['start']
         )

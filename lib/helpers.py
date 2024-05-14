@@ -70,42 +70,26 @@ def validate_audio_file(audio_file, allowed_mimetypes, max_audio_length):
     return True, "Valid audio file"
 
 
-def organize_detected_tones(detected_tone_data):
-    final_detected_tones = []
-    for key, tones in detected_tone_data.items():
-        final_detected_tones.extend(tones)
-    return final_detected_tones
-
-
 def inject_alert_tone_segments(whisper_segments, detected_tones):
     whisper_segments = list(whisper_segments)
-    final_segments = []
-    index = 0  # Index to track the current segment position
+    alert_segments = []
 
-    detected_tones_final = organize_detected_tones(detected_tones)
-
-    # Iterate over each detected tone
-    for tone in detected_tones_final:
-        # Ensure we add all segments before the tone starts
-        while index < len(whisper_segments) and whisper_segments[index]['end'] <= tone['start']:
-            final_segments.append(whisper_segments[index])
-            index += 1
-
-        # Insert the alert tone segment
-        final_segments.append({
+    for tone in detected_tones:
+        alert_segments.append({
+            "end": tone["end"],
+            "segment_id": len(whisper_segments) + len(alert_segments) + 1,
+            "start": tone["start"],
             "text": "[Alert Tones]",
-            "start": tone['start'],
-            "end": tone['end'],
-            "words": [{"start": tone['start'], "end": tone['end'], "word_id": 1, "word": "[Alert Tones]"}]
+            "unit_tag": 0,
+            "words": []
         })
 
-        # Skip over any segments that overlap with the current tone
-        while index < len(whisper_segments) and whisper_segments[index]['start'] < tone['end']:
-            index += 1
+    # Merge the new segments with existing segments and sort by start time
+    all_segments = whisper_segments + alert_segments
+    all_segments.sort(key=lambda x: x["start"])
 
-    # After handling all tones, add the remaining segments that come after the last tone
-    while index < len(whisper_segments):
-        final_segments.append(whisper_segments[index])
-        index += 1
+    # Update the segment IDs to maintain sequential order
+    for i, segment in enumerate(all_segments):
+        segment["segment_id"] = i + 1
 
-    return final_segments
+    return all_segments
