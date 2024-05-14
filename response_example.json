@@ -1,212 +1,171 @@
 {
-  "addresses": [
-    "348 Day Street"
-  ],
-  "message": "Transcribe Success!",
-  "process_time_seconds": 1.16,
-  "segments": [
+  "freq": 462950000,
+  "freq_error": -3145,
+  "signal": -19,
+  "noise": -63,
+  "source_num": 5,
+  "recorder_num": 8,
+  "tdma_slot": 0,
+  "phase2_tdma": 0,
+  "start_time": 1715451604,
+  "stop_time": 1715451645,
+  "emergency": 0,
+  "priority": 0,
+  "mode": 0,
+  "duplex": 0,
+  "encrypted": 0,
+  "call_length": 40,
+  "talkgroup": 200,
+  "talkgroup_tag": "EMS Med-9",
+  "talkgroup_description": "EMS Dispatch Med-9",
+  "talkgroup_group_tag": "EMS Dispatch",
+  "talkgroup_group": "EMS",
+  "audio_type": "analog",
+  "short_name": "bradford-pa",
+  "freqList": [
     {
-      "end": 22.7,
-      "segment_id": 1,
-      "start": 14.840000000000002,
-      "text": "410 Horsehead, this is your rambunctious call, shortness of breath, 348 Day Street, around",
-      "unit_tag": 0,
-      "words": [
-        {
-          "end": 15.6,
-          "start": 14.840000000000002,
-          "word": " 410",
-          "word_id": 1
-        },
-        {
-          "end": 16.1,
-          "start": 15.6,
-          "word": " Horsehead,",
-          "word_id": 2
-        },
-        {
-          "end": 16.32,
-          "start": 16.18,
-          "word": " this",
-          "word_id": 3
-        },
-        {
-          "end": 16.34,
-          "start": 16.32,
-          "word": " is",
-          "word_id": 4
-        },
-        {
-          "end": 16.36,
-          "start": 16.34,
-          "word": " your",
-          "word_id": 5
-        },
-        {
-          "end": 16.78,
-          "start": 16.36,
-          "word": " rambunctious",
-          "word_id": 6
-        },
-        {
-          "end": 17.36,
-          "start": 16.78,
-          "word": " call,",
-          "word_id": 7
-        },
-        {
-          "end": 18.6,
-          "start": 17.74,
-          "word": " shortness",
-          "word_id": 8
-        },
-        {
-          "end": 18.64,
-          "start": 18.6,
-          "word": " of",
-          "word_id": 9
-        },
-        {
-          "end": 18.84,
-          "start": 18.64,
-          "word": " breath,",
-          "word_id": 10
-        },
-        {
-          "end": 20.78,
-          "start": 19.12,
-          "word": " 348",
-          "word_id": 11
-        },
-        {
-          "end": 21.18,
-          "start": 20.78,
-          "word": " Day",
-          "word_id": 12
-        },
-        {
-          "end": 21.56,
-          "start": 21.18,
-          "word": " Street,",
-          "word_id": 13
-        },
-        {
-          "end": 22.7,
-          "start": 21.82,
-          "word": " around",
-          "word_id": 14
-        }
-      ]
-    },
-    {
-      "end": 24.04,
-      "segment_id": 2,
-      "start": 22.7,
-      "text": "between Tift and Chappy.",
-      "unit_tag": 0,
-      "words": [
-        {
-          "end": 23.02,
-          "start": 22.7,
-          "word": " between",
-          "word_id": 1
-        },
-        {
-          "end": 23.46,
-          "start": 23.02,
-          "word": " Tift",
-          "word_id": 2
-        },
-        {
-          "end": 23.62,
-          "start": 23.46,
-          "word": " and",
-          "word_id": 3
-        },
-        {
-          "end": 24.04,
-          "start": 23.62,
-          "word": " Chappy.",
-          "word_id": 4
-        }
-      ]
-    },
-    {
-      "end": 40.6,
-      "segment_id": 3,
-      "start": 32.379999999999995,
-      "text": "410 Horsehead, shortness of breath, 348 Day Street, prior control 1411.",
-      "unit_tag": 0,
-      "words": [
-        {
-          "end": 33.019999999999996,
-          "start": 32.379999999999995,
-          "word": " 410",
-          "word_id": 1
-        },
-        {
-          "end": 33.66,
-          "start": 33.019999999999996,
-          "word": " Horsehead,",
-          "word_id": 2
-        },
-        {
-          "end": 36.32,
-          "start": 33.74,
-          "word": " shortness",
-          "word_id": 3
-        },
-        {
-          "end": 36.36,
-          "start": 36.32,
-          "word": " of",
-          "word_id": 4
-        },
-        {
-          "end": 36.56,
-          "start": 36.36,
-          "word": " breath,",
-          "word_id": 5
-        },
-        {
-          "end": 38.06,
-          "start": 36.76,
-          "word": " 348",
-          "word_id": 6
-        },
-        {
-          "end": 38.42,
-          "start": 38.06,
-          "word": " Day",
-          "word_id": 7
-        },
-        {
-          "end": 38.74,
-          "start": 38.42,
-          "word": " Street,",
-          "word_id": 8
-        },
-        {
-          "end": 39.14,
-          "start": 38.94,
-          "word": " prior",
-          "word_id": 9
-        },
-        {
-          "end": 39.36,
-          "start": 39.14,
-          "word": " control",
-          "word_id": 10
-        },
-        {
-          "end": 40.6,
-          "start": 39.36,
-          "word": " 1411.",
-          "word_id": 11
-        }
-      ]
+      "freq": 462950000,
+      "time": 1715451604,
+      "pos": 0.0,
+      "len": 39.951,
+      "error_count": 0,
+      "spike_count": 0
     }
   ],
-  "success": true,
-  "transcript": "410 Horsehead, this is your rambunctious call, shortness of breath, 348 Day Street, around between Tift and Chappy. 410 Horsehead, shortness of breath, 348 Day Street, prior control 1411."
+  "srcList": [
+    {
+      "src": -1,
+      "time": 1715451604,
+      "pos": 0.0,
+      "emergency": 0,
+      "signal_system": "",
+      "tag": ""
+    }
+  ],
+  "filename": "200-1715451609_462950000.0-call_19067.wav",
+  "tones": {
+    "two_tone": [
+      {
+        "tone_id": "qc_1",
+        "detected": [
+          721.4,
+          1119.7
+        ],
+        "start": 0.948,
+        "end": 5.038
+      },
+      {
+        "tone_id": "qc_2",
+        "detected": [
+          721.4,
+          1119.7
+        ],
+        "start": 15.561,
+        "end": 19.651
+      }
+    ],
+    "long_tone": [],
+    "hi_low_tone": [
+      {
+        "tone_id": "hl_1",
+        "detected": [
+          2196.4,
+          2217.9
+        ],
+        "start": 33.268,
+        "end": 34.913
+      }
+    ]
+  },
+  "transcript": {
+    "addresses": [
+      "115 Broad Street Apartment 4"
+    ],
+    "message": "Transcribe Success!",
+    "process_time_seconds": 1.43,
+    "segments": [
+      {
+        "end": 9.3,
+        "segment_id": 1,
+        "start": 0.0,
+        "text": "Greater Valley EMS Waverly",
+        "unit_tag": 0,
+        "words": []
+      },
+      {
+        "end": 11.620000000000001,
+        "segment_id": 2,
+        "start": 9.3,
+        "text": "115 Broad Street",
+        "unit_tag": 0,
+        "words": []
+      },
+      {
+        "end": 13.14,
+        "segment_id": 3,
+        "start": 11.620000000000001,
+        "text": "Apartment 4 Respiratory",
+        "unit_tag": 0,
+        "words": []
+      },
+      {
+        "end": 25.240000000000002,
+        "segment_id": 4,
+        "start": 13.14,
+        "text": "Greater Valley EMS Waverly",
+        "unit_tag": 0,
+        "words": []
+      },
+      {
+        "end": 27.84,
+        "segment_id": 5,
+        "start": 25.240000000000002,
+        "text": "115 Broad Street",
+        "unit_tag": 0,
+        "words": []
+      },
+      {
+        "end": 28.84,
+        "segment_id": 6,
+        "start": 27.84,
+        "text": "Apartment 4",
+        "unit_tag": 0,
+        "words": []
+      },
+      {
+        "end": 31.12,
+        "segment_id": 7,
+        "start": 28.84,
+        "text": "363-year-old female",
+        "unit_tag": 0,
+        "words": []
+      },
+      {
+        "end": 32.5,
+        "segment_id": 8,
+        "start": 31.12,
+        "text": "Respiratory difficulty",
+        "unit_tag": 0,
+        "words": []
+      },
+      {
+        "end": 36.22,
+        "segment_id": 9,
+        "start": 32.5,
+        "text": "Call Team Sir Tioga",
+        "unit_tag": 0,
+        "words": []
+      },
+      {
+        "end": 38.2,
+        "segment_id": 10,
+        "start": 36.22,
+        "text": "Delta Priority 1420",
+        "unit_tag": 0,
+        "words": []
+      }
+    ],
+    "success": true,
+    "transcript": "Greater Valley EMS Waverly 115 Broad Street Apartment 4 Respiratory Greater Valley EMS Waverly 115 Broad Street Apartment 4 363-year-old female Respiratory difficulty Call Team Sir Tioga Delta Priority 1420"
+  }
 }

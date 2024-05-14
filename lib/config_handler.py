@@ -40,7 +40,8 @@ default_config = {
             "min_silence_duration_ms": 400,
             "window_size_samples": 1024,
             "speech_pad_ms": 400
-        }
+        },
+        "hotwords": None
     }
 }
 

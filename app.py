@@ -20,7 +20,7 @@ __version__ = "2.0"
 
 root_path = os.getcwd()
 config_file_name = "config.json"
-hallucination_file_name = "hallucinations.json"
+#hallucination_file_name = "hallucinations.json"
 
 log_file_name = f"{app_name}.log"
 
@@ -176,17 +176,11 @@ def transcribe():
                                               beam_size=user_whisper_config_data.get("beam_size", 5),
                                               best_of=user_whisper_config_data.get("best_of", 5),
                                               language=user_whisper_config_data.get("language", "en"),
-                                              initial_prompt=initial_prompt,
+                                              initial_prompt=initial_prompt or None,
                                               word_timestamps=user_whisper_config_data.get("word_timestamps", False),
                                               vad_filter=user_whisper_config_data.get("vad_filter", False),
-                                              vad_parameters=user_whisper_config_data.get("vad_parameters", {
-                                                  "threshold": 0.5,
-                                                  "min_speech_duration_ms": 250,
-                                                  "max_speech_duration_s": 3600,
-                                                  "min_silence_duration_ms": 2000,
-                                                  "window_size_samples": 1024,
-                                                  "speech_pad_ms": 400
-                                              }))
+                                              vad_parameters=user_whisper_config_data.get("vad_parameters", {"threshold": 0.5, "min_speech_duration_ms": 250, "max_speech_duration_s": 3600, "min_silence_duration_ms": 2000, "window_size_samples": 1024, "speech_pad_ms": 400}),
+                                              hotwords=user_whisper_config_data.get("hotwords", None))
 
             segment_texts = []
             segments_data = []
