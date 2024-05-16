@@ -1,5 +1,4 @@
-FROM nvidia/cuda:11.8.0-cudnn8-runtime-ubuntu22.04
-
+FROM nvidia/cuda:12.4.1-runtime-ubuntu22.04
 LABEL maintainer="ian@icarey.net"
 
 # Set the working directory in the container
@@ -27,6 +26,8 @@ RUN apt update  && \
     libmagic1 \
     tzdata \
     ffmpeg \
+    libcudnn8 \
+    libcudnn8-dev \
     && \
     apt clean && \
     rm -rf /var/lib/apt/lists/*
