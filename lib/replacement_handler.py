@@ -39,10 +39,16 @@ def transcript_replacement(transcript_dict, replacements_file_path):
         if 'transcript' in transcript_dict:
             transcript_dict['transcript'] = re.sub(pattern, replace_func, transcript_dict['transcript'], flags=re.IGNORECASE)
 
-        # Replace in each segment text
+        # Concatenate all segments' texts with a unique delimiter
         if 'segments' in transcript_dict:
-            for segment in transcript_dict['segments']:
-                segment['text'] = re.sub(pattern, replace_func, segment['text'], flags=re.IGNORECASE)
+            delimiter = '|SEGMENT_DELIMITER|'
+            all_segments_text = delimiter.join(segment['text'] for segment in transcript_dict['segments'])
+            all_segments_text_replaced = re.sub(pattern, replace_func, all_segments_text, flags=re.IGNORECASE)
+
+            # Split the replaced text back into segments based on the delimiter
+            replaced_segments = all_segments_text_replaced.split(delimiter)
+            for segment, replaced_text in zip(transcript_dict['segments'], replaced_segments):
+                segment['text'] = replaced_text
 
     except re.error as e:
         module_logger.warning(f"Regex error: {e}")
