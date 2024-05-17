@@ -19,6 +19,7 @@ default_config = {
         "compute_type": "float16",
         "model": "large-v3",
         "language": "en",
+        "replacements_file": "transcribe_replacements.csv",
         "beam_size": 5,
         "best_of": 5,
         "initial_prompt": None,

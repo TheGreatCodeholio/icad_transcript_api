@@ -1,6 +1,5 @@
 import io
 import json
-from os.path import splitext
 import copy
 
 import magic

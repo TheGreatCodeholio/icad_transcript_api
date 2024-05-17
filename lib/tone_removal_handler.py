@@ -1,5 +1,8 @@
+import logging
+
 from pydub import AudioSegment
 
+module_logger = logging.getLogger('icad_transcribe.tone_removal')
 
 def split_audio(audio_segment, chunk_length=1000):
     """
@@ -99,5 +102,5 @@ def cut_tones_from_audio(detected_tones, audio_segment, pre_cut_length=0.5, post
         return processed_audio
 
     except Exception as e:
-        print(f"An error occurred while processing the audio: {e}")
+        module_logger.error(f"An error occurred while cutting tones from the audio: {e}")
         return None

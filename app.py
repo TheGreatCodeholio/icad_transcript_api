@@ -12,11 +12,12 @@ from lib.address_handler import get_potential_addresses
 from lib.config_handler import load_config_file, get_max_content_length, is_model_outdated
 from lib.helpers import load_json, update_config, validate_audio_file, inject_alert_tone_segments
 from lib.logging_handler import CustomLogger
+from lib.replacement_handler import transcript_replacement
 from lib.tone_removal_handler import cut_tones_from_audio, apply_agc_with_silence_detection
 from lib.unit_handler import associate_segments_with_src
 
 app_name = "icad_transcribe"
-__version__ = "2.0"
+__version__ = "2.1"
 
 root_path = os.getcwd()
 config_file_name = "config.json"
@@ -69,7 +70,7 @@ try:
         model = WhisperModel(model_dir,
                              device=config_data.get("whisper", {}).get("device", "cpu"),
                              cpu_threads=config_data.get("whisper", {}).get("cpu_threads", 4),
-                             compute_type=config_data.get("whisper", {}).get("compute_type", "float32"))
+                             compute_type=config_data.get("whisper", {}).get("compute_type", "float16"))
     else:
         logger.error(f'Whisper device needs to be either CPU or Cuda.')
         time.sleep(5)
@@ -228,6 +229,10 @@ def transcribe():
         result = {"success": True, "message": "Transcribe Success!", "transcript": transcribe_text,
                   "addresses": addresses, "segments": segments_data,
                   "process_time_seconds": round((time.time() - start), 2)}
+
+        if not user_whisper_config_data.get("word_timestamps", False):
+            result = transcript_replacement(result, replacements_file_path=os.path.join(config_path, user_whisper_config_data.get("replacements_file", "transcribe_replacements.csv")))
+
         logger.info(result.get("message"))
         return jsonify(result), 200
     else:
