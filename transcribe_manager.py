@@ -40,19 +40,19 @@ TRANSFORMERS_CACHE=/app/models
 
 
 def run_docker_compose():
-    subprocess.run(["docker-compose", "up", "-d"], check=True)
+    subprocess.run(["docker", "compose", "up", "-d"], check=True)
     print("Docker Compose has started the services.")
 
 
 def update_services():
-    subprocess.run(["docker-compose", "pull"], check=True)
-    subprocess.run(["docker-compose", "up", "-d"], check=True)
+    subprocess.run(["docker", "compose", "pull"], check=True)
+    subprocess.run(["docker", "compose", "up", "-d"], check=True)
     print("Services have been updated.")
 
 
 def reset_services(working_path):
     # Stop and remove all containers, networks, and volumes associated with the project
-    subprocess.run(["docker-compose", "down", "-v"], check=True)
+    subprocess.run(["docker", "compose", "down", "-v"], check=True)
     print("Stopped and removed all project containers, networks, and volumes.")
 
     # Remove .env file if it exists
@@ -62,7 +62,7 @@ def reset_services(working_path):
         print(f"Removed Environment Variables from {env_file_path}: .env")
 
     generate_env_file(working_path)
-    subprocess.run(["docker-compose", "pull"], check=True)
+    subprocess.run(["docker", "compose", "pull"], check=True)
     run_docker_compose()
     print("Services have been reset and started with new configurations.")
 

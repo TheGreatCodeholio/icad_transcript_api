@@ -2,6 +2,12 @@ FROM nvidia/cuda:12.4.1-runtime-ubuntu22.04
 
 LABEL maintainer="ian@icarey.net"
 
+ARG USER_ID=9911
+ARG GROUP_ID=9911
+
+RUN addgroup --gid ${GROUP_ID} icad && \
+    adduser --uid ${USER_ID} --gid ${GROUP_ID} icad
+
 # Set the working directory in the container
 WORKDIR /app
 
@@ -45,5 +51,7 @@ RUN pip3 install --upgrade pip
 
 # Install any needed packages specified in requirements.txt
 RUN pip3 install -r requirements.txt
+
+USER icad
 
 CMD ["gunicorn", "-b", "0.0.0.0:9912", "-t", "300", "app:app"]
